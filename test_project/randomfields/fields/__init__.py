@@ -55,16 +55,11 @@ class RandomFieldBase(models.Field):
                         choices = set()
                         choices.add(value)
                         
-                        """
-                            variation of the birthday problem: http://en.wikipedia.org/wiki/Birthday_problem#Same_birthday_as_you
-                            
-                            n: number of possibilities taken
-                            d: number of possibilities
-                            p: probability of collision
-                        """
+                        # determine how many random values to generate
                         n = obj.__class__.objects.count()
-                        d = self.possibilities()
-                        p = 1.0 - ( (d-1.0) / d ) ** n
+                        a = 0
+                        b = float(self.possibilities())
+                        p = 1 - ((b - a + 1 - n) / (b - a + 1))
                         
                         x = log(self.alpha) / log(p)
                         x = ceil(x)
