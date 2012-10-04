@@ -1,5 +1,13 @@
 from django.db import models
-from randomfields.fields.integer import RandomIntegerField, RandomSmallIntegerField
+from randomfields.fields.integer import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField
+
+class RandomBigIntegerFieldDemo(models.Model):
+    id = RandomBigIntegerField(primary_key=True)
+    unique = RandomBigIntegerField(unique=True)
+    normal = RandomBigIntegerField()
+    
+    def __unicode__(self):
+        return u"%s" % self.id
 
 class RandomIntegerFieldDemo(models.Model):
     id = RandomIntegerField(primary_key=True)

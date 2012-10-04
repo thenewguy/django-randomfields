@@ -8,6 +8,17 @@ if urandom_available:
 else:
     from random import randint
 
+class RandomBigIntegerField(models.BigIntegerField, RandomFieldBase):
+    if urandom_available:
+        def random(self):
+            return unpack("=q", urandom(8))[0]
+    else:
+        def random(self):
+            return randint(-9223372036854775808, 9223372036854775807)
+    
+    def possibilities(self):
+        return 18446744073709551616# 18,446,744,073,709,551,615 + 1 (for zero)
+
 class RandomIntegerField(models.IntegerField, RandomFieldBase):
     if urandom_available:
         def random(self):
