@@ -10,6 +10,8 @@ else:
     urandom_available = True
 
 class RandomFieldBase(models.Field):
+    empty_strings_allowed = False
+    
     def __init__(self, *args, **kwargs):
         kwargs['blank'] = True
         kwargs['null'] = False
@@ -21,7 +23,7 @@ class RandomFieldBase(models.Field):
     
     def pre_save(self, obj, add):
         self.was_added = add
-        if add and getattr(obj, self.attname) is None:
+        if add and getattr(obj, self.attname) in (None, ""):
             value = self.random()
             setattr(obj, self.attname, value)
             return getattr(obj, self.attname)
