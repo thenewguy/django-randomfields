@@ -17,4 +17,4 @@ class RandomIntegerField(models.IntegerField, RandomFieldBase):
             return randint(-2147483648, 2147483647)
     
     def possibilities(self):
-        return 4294967295# 4,294,967,295
+        return 4294967296# 4,294,967,295 + 1 (for zero)
