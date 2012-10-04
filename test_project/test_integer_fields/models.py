@@ -1,7 +1,7 @@
 from django.db import models
 from randomfields.fields.integer import RandomIntegerField
 
-class Instances(models.Model):
+class RandomIntegerFieldDemo(models.Model):
     id = RandomIntegerField(primary_key=True)
     unique = RandomIntegerField(unique=True)
     normal = RandomIntegerField()
