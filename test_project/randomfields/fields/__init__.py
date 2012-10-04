@@ -56,10 +56,9 @@ class RandomFieldBase(models.Field):
                         choices.add(value)
                         
                         # determine how many random values to generate
-                        n = obj.__class__.objects.count()
-                        a = 0
-                        b = float(self.possibilities())
-                        p = 1 - ((b - a + 1 - n) / (b - a + 1))
+                        a = float(self.possibilities())# count of all possibilities
+                        t = obj.__class__.objects.count()# count of taken possibilities
+                        p = 1 - ((a - t) / a)# probability of collision
                         
                         x = log(self.alpha) / log(p)
                         x = ceil(x)
