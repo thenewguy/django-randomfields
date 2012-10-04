@@ -12,10 +12,8 @@ else:
 class RandomFieldBase(models.Field):
     def __init__(self, *args, **kwargs):
         kwargs['blank'] = True
+        kwargs['null'] = False
         super(RandomFieldBase, self).__init__(*args, **kwargs)
-        
-        if self.null:
-            raise ValueError("The 'null' kwarg of %r must evaluate to False." % self.__class__)
         
         self.was_added = False
         self.max_retry = kwargs.get("max_retry", 3)
