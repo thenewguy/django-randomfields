@@ -56,16 +56,25 @@ class RandomFieldBase(models.Field):
                         choices = set()
                         choices.add(value)
                         
-                        # determine how many random values to generate
+                        # ensure unique values are available
                         possibilities = self.possibilities()# count of all possibilities
-                        a = float(possibilities)# force float
                         t = obj.__class__.objects.count()# count of taken possibilities
-                        p = 1 - ((a - t) / a)# probability of collision
+                        if t == possibilities:
+                            raise IntegrityError("All possibilities for field '%s' on %r are taken. This may or may not be the only issue.  Additional details: %s" % (
+                                        name,
+                                        obj.__class__,
+                                        e
+                                )
+                            )
                         
+                        # determine how many random values to generate
+                        a = float(possibilities)# force float
+                        p = 1 - ((a - t) / a)# probability of collision
                         x = log(self.alpha) / log(p)
                         x = ceil(x)
                         x = int(x)
-                        
+
+                        # ensure we do not try to generate more values than possible
                         count = 1 + x
                         if possibilities < count:
                             count = possibilities
