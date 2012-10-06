@@ -57,7 +57,8 @@ class RandomFieldBase(models.Field):
                         choices.add(value)
                         
                         # determine how many random values to generate
-                        a = float(self.possibilities())# count of all possibilities
+                        possibilities = self.possibilities()# count of all possibilities
+                        a = float(possibilities)# force float
                         t = obj.__class__.objects.count()# count of taken possibilities
                         p = 1 - ((a - t) / a)# probability of collision
                         
@@ -66,6 +67,8 @@ class RandomFieldBase(models.Field):
                         x = int(x)
                         
                         count = 1 + x
+                        if possibilities < count:
+                            count = possibilities
                         
                         while len(choices) < count:
                             choices.add(self.random())
@@ -105,6 +108,6 @@ class RandomFieldBase(models.Field):
     
     def possibilities(self):
         """
-            method returns the number of possibilities that a random value may take
+            method returns the number of possibilities that a random value may take as an integer
         """
         raise NotImplementedError("possibilities() must be implemented by subclasses.")
