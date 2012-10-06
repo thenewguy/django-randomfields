@@ -13,13 +13,14 @@ class RandomFieldBase(models.Field):
     empty_strings_allowed = False
     
     def __init__(self, *args, **kwargs):
+        self.max_retry = kwargs.pop("max_retry", 3)
+        self.alpha = kwargs.pop("alpha", 0.0001)
+        
         kwargs['blank'] = True
         kwargs['null'] = False
         super(RandomFieldBase, self).__init__(*args, **kwargs)
         
         self.was_added = False
-        self.max_retry = kwargs.get("max_retry", 3)
-        self.alpha = kwargs.get("alpha", 0.0001)
     
     def pre_save(self, obj, add):
         self.was_added = add
