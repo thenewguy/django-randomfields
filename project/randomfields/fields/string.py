@@ -22,4 +22,8 @@ class RandomCharField(models.CharField, RandomFieldBase):
         return "".join([choice(self.valid_chars) for _ in xrange(length)])
     
     def possibilities(self):
-        return len(self.valid_chars) ** self.max_length
+        if self.min_length is None or self.min_length == self.max_length:
+            return len(self.valid_chars) ** self.max_length
+        else:
+            vcl = len(self.valid_chars)
+            return sum([vcl ** n for n in xrange(self.min_length, self.max_length+1)])
