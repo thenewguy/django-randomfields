@@ -1,5 +1,6 @@
 from django.db import models, IntegrityError
 from math import log, ceil
+import logging
 
 from os import urandom
 try:
@@ -15,6 +16,10 @@ class RandomFieldBase(models.Field):
     def __init__(self, *args, **kwargs):
         self.max_retry = kwargs.pop("max_retry", 3)
         self.alpha = kwargs.pop("alpha", 0.0001)
+        
+        # Default to the percent that causes us to generate 100 values.
+        # This is roughly 91.2% full with an alpha of 0.0001.
+        self.warn_at_percent = kwargs.pop("warn_at_percent", self.alpha ** (1.0 / 100))
         
         kwargs['blank'] = True
         kwargs['null'] = False
@@ -73,6 +78,18 @@ class RandomFieldBase(models.Field):
                         x = log(self.alpha) / log(p)
                         x = ceil(x)
                         x = int(x)
+                        
+                        # warn if over full
+                        percent_used = t / a
+                        if self.warn_at_percent < percent_used:
+                            remaining_choices = possibilities - t
+                            logging.warning("%.2f%% of the choices for field '%s' on %r are taken.  There %s remaining." % (
+                                    percent_used * 100,
+                                    name,
+                                    obj.__class__,
+                                    ("are %d choices" if 1 < remaining_choices else "is %d choice") % remaining_choices
+                                )
+                            )
 
                         # ensure we do not try to generate more values than possible
                         count = 1 + x
