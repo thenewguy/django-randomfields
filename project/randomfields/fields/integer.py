@@ -8,35 +8,48 @@ if urandom_available:
 else:
     from random import randint
 
-class RandomBigIntegerField(models.BigIntegerField, RandomFieldBase):
+class RandomIntegerFieldBase(RandomFieldBase):
+    _bytes = None
+    _unpack_fmt = None
+    
+    def __init__(self, *args, **kwargs):
+        super(RandomIntegerFieldBase, self).__init__(*args, **kwargs)
+        
+        bit_exp = self.bytes * 8 - 1
+        self.lower_bound = -(2 ** bit_exp)
+        self.upper_bound = 2 ** bit_exp - 1
+        self._possibilities = self.upper_bound - self.lower_bound + 1
+    
     if urandom_available:
         def random(self):
-            return unpack("=q", urandom(8))[0]
+            return unpack(self.unpack_fmt, urandom(self.bytes))[0]
     else:
         def random(self):
-            return randint(-9223372036854775808, 9223372036854775807)
+            return randint(self.lower_bound, self.upper_bound)
     
     def possibilities(self):
-        return 18446744073709551616# 18,446,744,073,709,551,615 + 1 (for zero)
+        return self._possibilities
+    
+    @property
+    def bytes(self):
+        if self._bytes is None:
+            raise NotImplementedError("Subclasses must define self._bytes as an integer specifying how many bytes the integer is.")
+        return self._bytes
+    
+    @property
+    def unpack_fmt(self):
+        if self._unpack_fmt is None:
+            raise NotImplementedError("Subclasses must define self._unpack_fmt as a string to be passed directly to unpack.")
+        return self._unpack_fmt
 
-class RandomIntegerField(models.IntegerField, RandomFieldBase):
-    if urandom_available:
-        def random(self):
-            return unpack("=i", urandom(4))[0]
-    else:
-        def random(self):
-            return randint(-2147483648, 2147483647)
-    
-    def possibilities(self):
-        return 4294967296# 4,294,967,295 + 1 (for zero)
+class RandomBigIntegerField(models.BigIntegerField, RandomIntegerFieldBase):
+    _bytes = 8
+    _unpack_fmt = "=q"
 
-class RandomSmallIntegerField(models.SmallIntegerField, RandomFieldBase):
-    if urandom_available:
-        def random(self):
-            return unpack("=h", urandom(2))[0]
-    else:
-        def random(self):
-            return randint(-32768, 32767)
-    
-    def possibilities(self):
-        return 65536# 65,535 + 1 (for zero)
+class RandomIntegerField(models.IntegerField, RandomIntegerFieldBase):
+    _bytes = 4
+    _unpack_fmt = "=i"
+
+class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
+    _bytes = 2
+    _unpack_fmt = "=h"
