@@ -17,3 +17,6 @@ class TestUnique(models.Model):
 
 class TestMinLengthPossibilities(models.Model):
     data = RandomCharField(unique=True, max_length=2, min_length=1, valid_chars="ab")
+
+class TestFixLengthPossibilities(models.Model):
+    data = RandomCharField(unique=True, max_length=2, valid_chars="ab")

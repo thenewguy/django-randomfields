@@ -1,6 +1,6 @@
 from django.db import IntegrityError
 from django.test import TestCase
-from models import TestPrimaryKey, TestUnique, TestMinLengthPossibilities
+from models import TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities
 
 class SaveTests(TestCase):
     def test_auto_primary_key(self):
@@ -57,3 +57,32 @@ class SaveTests(TestCase):
         
         # ensure an integrity error is thrown on subsequent saves
         self.assertRaises(IntegrityError, TestMinLengthPossibilities().save)
+    
+    def test_fix_length_possibilities(self):
+        obj1 = TestFixLengthPossibilities()
+        self.assertEqual(obj1._meta.get_field("data").valid_chars, "ab")
+        self.assertEqual(obj1._meta.get_field("data").max_length, 2)
+        self.assertIs(obj1._meta.get_field("data").min_length, None)
+        """
+            possibilities:
+                aa
+                ab
+                ba
+                bb
+        """
+        self.assertEqual(4, obj1._meta.get_field("data").possibilities())
+        
+        # ensure all possibilities are saved
+        while TestFixLengthPossibilities.objects.count() < 4:
+            TestFixLengthPossibilities().save()
+        
+        all_values = TestFixLengthPossibilities.objects.all().values_list("data", flat=True)
+        self.assertNotIn('a', all_values)
+        self.assertIn('aa', all_values)
+        self.assertIn('ab', all_values)
+        self.assertIn('ba', all_values)
+        self.assertIn('bb', all_values)
+        self.assertNotIn('b', all_values)
+        
+        # ensure an integrity error is thrown on subsequent saves
+        self.assertRaises(IntegrityError, TestFixLengthPossibilities().save)
