@@ -25,10 +25,10 @@ class RandomFieldBase(models.Field):
         kwargs['null'] = False
         super(RandomFieldBase, self).__init__(*args, **kwargs)
         
-        self.was_added = False
+        self.__was_added = False
     
     def pre_save(self, obj, add):
-        self.was_added = add
+        self.__was_added = add
         if add and getattr(obj, self.attname) in (None, ""):
             value = self.random()
             setattr(obj, self.attname, value)
@@ -50,7 +50,7 @@ class RandomFieldBase(models.Field):
                     cls_save(obj, *args, **kwargs)
                 except IntegrityError, e:
                     unsaved = e
-                    if self.was_added and self.unique:
+                    if self.__was_added and self.unique:
                         # 'force_insert' is required to prevent the instance from
                         # being saved as an update and erroneously overwriting a
                         # database instance on subsequent retries
