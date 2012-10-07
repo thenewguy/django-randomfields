@@ -9,6 +9,12 @@ class RandomCharFieldDemo(models.Model):
     def __unicode__(self):
         return u"%s" % self.id
 
+class WarnAtPercentDemo(models.Model):
+    id = RandomCharField(primary_key=True, max_length=3, min_length=1, valid_chars="0123ABC", warn_at_percent=0.6)
+    
+    def __unicode__(self):
+        return u"%s" % self.id
+
 class TestPrimaryKey(models.Model):
     id = RandomCharField(primary_key=True, max_length=10)
 
