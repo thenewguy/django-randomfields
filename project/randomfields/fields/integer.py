@@ -1,12 +1,15 @@
 from django.db import models
+from . import RandomFieldBase
 
-from . import urandom_available, RandomFieldBase
-
-if urandom_available:
-    from os import urandom
-    from struct import unpack
-else:
+from os import urandom
+try:
+    urandom(1)
+except NotImplementedError:
+    urandom_available = False
     from random import randint
+else:
+    urandom_available = True
+    from struct import unpack    
 
 class RandomIntegerFieldBase(RandomFieldBase):
     _bytes = None

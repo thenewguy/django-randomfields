@@ -2,14 +2,6 @@ from django.db import models, IntegrityError
 from math import log, ceil
 import logging
 
-from os import urandom
-try:
-    urandom(1)
-except NotImplementedError:
-    urandom_available = False
-else:
-    urandom_available = True
-
 class RandomFieldBase(models.Field):
     empty_strings_allowed = False
     
