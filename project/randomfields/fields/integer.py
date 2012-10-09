@@ -56,3 +56,47 @@ class RandomIntegerField(models.IntegerField, RandomIntegerFieldBase):
 class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
     _bytes = 2
     _unpack_fmt = "=h"
+
+class IntegerIdentifierBase(models.Field):
+    __metaclass__ = models.SubfieldBase
+    _pos = 8
+    _neg = 9
+    
+    def to_python(self, value):
+        value = super(IntegerIdentifierBase, self).to_python(value)
+        if value is not None and not self.upper_bound < value:
+            digit = self._neg if value < 0 else self._pos
+            value = str(abs(value)).zfill(len(str(self.possibilities())))
+            value = "%s%s" % (digit, value)
+            value = int(value)
+        return value
+    
+    def get_prep_value(self, value):
+        value = super(IntegerIdentifierBase, self).get_prep_value(value)
+        if value is not None and self.upper_bound < value:
+            value = str(value)
+            digit = int(value[0])
+            if digit == self._pos:
+                value = int(value[1:])
+            elif digit == self._neg:
+                value = -1 * int(value[1:])
+            else:
+                raise ValueError("'%s' is invalid because '%s' is an ambiguous most significant digit." % (value, digit))
+        return value
+    
+    def formfield(self, **kwargs):
+        defaults = {
+            'min_value': None,
+            'max_value': None
+        }
+        defaults.update(kwargs)
+        return super(IntegerIdentifierBase, self).formfield(**defaults)
+
+class RandomBigIntegerIdentifierField(IntegerIdentifierBase, RandomBigIntegerField):
+    pass
+
+class RandomIntegerIdentifierField(IntegerIdentifierBase, RandomIntegerField):
+    pass
+
+class RandomSmallIntegerIdentifierField(IntegerIdentifierBase, RandomSmallIntegerField):
+    pass

@@ -1,6 +1,7 @@
 from django.test import TestCase
 
-from randomfields.fields.integer import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField
+from randomfields.fields.integer import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
+                                        RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField
 
 class FieldTests(TestCase):
     def test_big_integer_bounds(self):
@@ -38,3 +39,11 @@ class FieldTests(TestCase):
             value = field.random()
             self.assertGreaterEqual(value, field.lower_bound)
             self.assertLessEqual(value, field.upper_bound)
+    
+    def test_integer_identifier_conversions(self):
+        for cls in [RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField]:
+            field = cls()
+            for value in xrange(-20, 21, 1):
+                for x in [value, field.random()]:
+                    res = field.to_python(x)
+                    self.assertEqual(field.get_prep_value(res), x)
