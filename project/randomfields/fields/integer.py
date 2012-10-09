@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django import forms
 from . import RandomFieldBase
 
 from os import urandom
@@ -57,6 +59,35 @@ class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
     _bytes = 2
     _unpack_fmt = "=h"
 
+class IntegerIdentifierFormField(forms.IntegerField):
+    def __init__(self, lower_bound, upper_bound, field_to_python, field_get_prep_value, *args, **kwargs):
+        super(IntegerIdentifierFormField, self).__init__(*args, **kwargs)
+        
+        self.lower_bound = lower_bound
+        self.upper_bound = upper_bound
+        self.field_to_python = field_to_python
+        self.field_get_prep_value = field_get_prep_value
+    
+    def validate(self, value):
+        try:
+            tpv = self.field_to_python(value)
+        except Exception, e:
+            raise ValidationError(e)
+        
+        try:
+            gpv = self.field_get_prep_value(tpv)
+        except Exception, e:
+            raise ValidationError(e)
+        
+        if gpv is not None and (self.upper_bound < gpv or gpv < self.lower_bound):
+            raise ValidationError("%s maps to %s which is out of range.  Resulting values must fall between %s and %s." % (
+                    value,
+                    gpv,
+                    self.lower_bound,
+                    self.upper_bound
+                )
+            )
+
 class IntegerIdentifierBase(models.Field):
     __metaclass__ = models.SubfieldBase
     _pos = 8
@@ -87,7 +118,12 @@ class IntegerIdentifierBase(models.Field):
     def formfield(self, **kwargs):
         defaults = {
             'min_value': None,
-            'max_value': None
+            'max_value': None,
+            'form_class': IntegerIdentifierFormField,
+            'lower_bound': self.lower_bound,
+            'upper_bound': self.upper_bound,
+            'field_to_python': self.to_python,
+            'field_get_prep_value': self.get_prep_value
         }
         defaults.update(kwargs)
         return super(IntegerIdentifierBase, self).formfield(**defaults)
