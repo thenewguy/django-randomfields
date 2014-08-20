@@ -74,3 +74,10 @@ class FieldTests(TestCase):
             (32767, 98303),
         )
         self._test_integer_identifier_conversions(RandomSmallIntegerIdentifierField, value_map)
+    
+    def test_integerfield_identifier_zfill_width(self):
+        for field_cls in (RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField):
+            field = field_cls()
+            lb = "%s" % field.to_python(field.lower_bound)
+            ub = "%s" % field.to_python(field.upper_bound)
+            self.assertEqual(len(lb), len(ub))
