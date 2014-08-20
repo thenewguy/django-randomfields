@@ -44,6 +44,14 @@ class RandomIntegerFieldBase(RandomFieldBase):
         if self._unpack_fmt is None:
             raise NotImplementedError("Subclasses must define self._unpack_fmt as a string to be passed directly to unpack.")
         return self._unpack_fmt
+    
+    def formfield(self, **kwargs):
+        defaults = {
+            'min_value': self.lower_bound,
+            'max_value': self.upper_bound,
+        }
+        defaults.update(kwargs)
+        return super(RandomIntegerFieldBase, self).formfield(**defaults)
 
 class RandomBigIntegerField(models.BigIntegerField, RandomIntegerFieldBase):
     _bytes = 8
@@ -106,6 +114,14 @@ class IntegerIdentifierBase(models.Field):
                 value = self.to_python(value)
             value = value.db_value
         return value
+    
+    def formfield(self, **kwargs):
+        defaults = {
+            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities()),
+            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities()),
+        }
+        defaults.update(kwargs)
+        return super(IntegerIdentifierBase, self).formfield(**defaults)
 
 class RandomBigIntegerIdentifierField(IntegerIdentifierBase, RandomBigIntegerField):
     pass
