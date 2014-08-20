@@ -1,6 +1,4 @@
-from django.core.exceptions import ValidationError
 from django.db import models
-from django import forms
 from . import RandomFieldBase
 
 from os import urandom
@@ -59,74 +57,55 @@ class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
     _bytes = 2
     _unpack_fmt = "=h"
 
-class IntegerIdentifierFormField(forms.IntegerField):
-    def __init__(self, lower_bound, upper_bound, field_to_python, field_get_prep_value, *args, **kwargs):
-        super(IntegerIdentifierFormField, self).__init__(*args, **kwargs)
+class IntegerIdentifierValue(object):
+    def __init__(self, value, possibilities):
+        # for 32 bit int, possibilities is 4,294,967,296
+        # because the possible unsigned values are [0, 4294967295]
+        # In this case, map 0 to 4,294,967,296 and map
+        # 4,294,967,295 to 8,589,934,591
+        if value < possibilities:
+            self.display_value = value + possibilities
+            self.db_value = value
+        else:
+            self.display_value = value
+            self.db_value = value - possibilities
         
-        self.lower_bound = lower_bound
-        self.upper_bound = upper_bound
-        self.field_to_python = field_to_python
-        self.field_get_prep_value = field_get_prep_value
+        self.length = len(str(possibilities))
     
-    def validate(self, value):
-        try:
-            tpv = self.field_to_python(value)
-        except Exception, e:
-            raise ValidationError(e)
-        
-        try:
-            gpv = self.field_get_prep_value(tpv)
-        except Exception, e:
-            raise ValidationError(e)
-        
-        if gpv is not None and (self.upper_bound < gpv or gpv < self.lower_bound):
-            raise ValidationError("%s maps to %s which is out of range.  Resulting values must fall between %s and %s." % (
-                    value,
-                    gpv,
-                    self.lower_bound,
-                    self.upper_bound
-                )
-            )
+    def __str__(self):
+        return str(self.display_value).zfill(self.length)
+    
+    def __unicode__(self):
+        return unicode(self.__str__())
+    
+    def __int__(self):
+        return self.display_value
+    
+    def get_prep_value(self):
+        return self.db_value
 
 class IntegerIdentifierBase(models.Field):
     __metaclass__ = models.SubfieldBase
-    _pos = 8
-    _neg = 9
-    
+        
     def to_python(self, value):
-        value = super(IntegerIdentifierBase, self).to_python(value)
-        if value is not None and not self.upper_bound < value:
-            digit = self._neg if value < 0 else self._pos
-            value = str(abs(value)).zfill(len(str(self.possibilities())))
-            value = "%s%s" % (digit, value)
-            value = int(value)
+        """
+            Deal gracefully with any of the following arguments:
+                - An instance of the correct type (e.g., Hand in our ongoing example).
+                - A string (e.g., from a deserializer).
+                - Whatever the database returns for the column type you're using.
+        """
+        if value is not None and not isinstance(value, IntegerIdentifierValue):
+            value = super(IntegerIdentifierBase, self).to_python(value)
+            value = IntegerIdentifierValue(value, self.possibilities())
+        
         return value
     
     def get_prep_value(self, value):
-        value = super(IntegerIdentifierBase, self).get_prep_value(value)
-        if value is not None and self.upper_bound < value:
-            value = str(value)
-            digit = int(value[0])
-            if digit == self._pos:
-                value = int(value[1:])
-            elif digit == self._neg:
-                value = -1 * int(value[1:])
-            else:
-                raise ValueError("'%s' is invalid because '%s' is an ambiguous most significant digit." % (value, digit))
+        if value is not None:
+            if not isinstance(value, IntegerIdentifierValue):
+                value = self.to_python(value)
+            value = value.db_value
         return value
-    
-    def formfield(self, **kwargs):
-        defaults = {
-            'min_value': None,
-            'max_value': None,
-            'form_class': IntegerIdentifierFormField,
-            'lower_bound': self.lower_bound,
-            'upper_bound': self.upper_bound,
-            'field_to_python': self.to_python,
-            'field_get_prep_value': self.get_prep_value
-        }
-        defaults.update(kwargs)
-        return super(IntegerIdentifierBase, self).formfield(**defaults)
 
 class RandomBigIntegerIdentifierField(IntegerIdentifierBase, RandomBigIntegerField):
     pass
