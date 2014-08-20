@@ -15,6 +15,10 @@ class RandomFieldBase(models.Field):
         
         kwargs['blank'] = True
         kwargs['null'] = False
+        
+        if kwargs.get('primary_key', False):
+            kwargs.setdefault('editable', False)
+        
         super(RandomFieldBase, self).__init__(*args, **kwargs)
         
         self.__was_added = False
