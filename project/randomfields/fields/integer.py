@@ -66,12 +66,13 @@ class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
     _unpack_fmt = "=h"
 
 class IntegerIdentifierValue(object):
-    def __init__(self, value, possibilities):
+    def __init__(self, value, possibilities, lower_bound):
         # for 32 bit int, possibilities is 4,294,967,296
         # because the possible unsigned values are [0, 4294967295]
         # In this case, map 0 to 4,294,967,296 and map
         # 4,294,967,295 to 8,589,934,591
-        if value < possibilities:
+        discriminator = possibilities - abs(lower_bound)
+        if value < discriminator:
             self.display_value = value + possibilities
             self.db_value = value
         else:
@@ -104,7 +105,7 @@ class IntegerIdentifierBase(models.Field):
         """
         if value is not None and not isinstance(value, IntegerIdentifierValue):
             value = super(IntegerIdentifierBase, self).to_python(value)
-            value = IntegerIdentifierValue(value, self.possibilities())
+            value = IntegerIdentifierValue(value, self.possibilities(), self.lower_bound)
         
         return value
     
@@ -117,8 +118,8 @@ class IntegerIdentifierBase(models.Field):
     
     def formfield(self, **kwargs):
         defaults = {
-            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities()),
-            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities()),
+            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities(), self.lower_bound),
+            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities(), self.lower_bound),
         }
         defaults.update(kwargs)
         return super(IntegerIdentifierBase, self).formfield(**defaults)
