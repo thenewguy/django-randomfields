@@ -65,8 +65,8 @@ class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
     _bytes = 2
     _unpack_fmt = "=h"
 
-class IntegerIdentifierValue(object):
-    def __init__(self, value, possibilities, lower_bound, upper_bound):
+class IntegerIdentifierValue(str):
+    def __new__(self, value, possibilities, lower_bound, upper_bound):
         # for 32 bit int, possibilities is 4,294,967,296
         # because the possible unsigned values are [0, 4294967295]
         # In this case, map 0 to 4,294,967,296 and map
@@ -79,13 +79,11 @@ class IntegerIdentifierValue(object):
             self.display_value = value
             self.db_value = value - possibilities
         
-        self.length = len(str(possibilities + upper_bound))
-    
-    def __str__(self):
-        return str(self.display_value).zfill(self.length)
-    
-    def __unicode__(self):
-        return unicode(self.__str__())
+        length = len(str(possibilities + upper_bound))
+        
+        display_str = str(self.display_value).zfill(length)
+        
+        return str.__new__(self, display_str)
     
     def __int__(self):
         return self.display_value
