@@ -1,49 +1,49 @@
 from django.db import models
 from . import RandomFieldBase
-
+from random import randint
 from os import urandom
 try:
     urandom(1)
 except NotImplementedError:
     urandom_available = False
-    from random import randint
 else:
     urandom_available = True
     from struct import unpack    
 
 class RandomIntegerFieldBase(RandomFieldBase):
-    _bytes = None
-    _unpack_fmt = None
+    bytes = None
+    unpack_fmt = None
+    lower_bound = None
+    upper_bound = None
     
     def __init__(self, *args, **kwargs):
         super(RandomIntegerFieldBase, self).__init__(*args, **kwargs)
         
-        bit_exp = self.bytes * 8 - 1
-        self.lower_bound = -(2 ** bit_exp)
-        self.upper_bound = 2 ** bit_exp - 1
+        if self.bytes:
+            if self.unpack_fmt is None:
+                raise TypeError("unpack_fmt must not be None when bytes is specified")
+            
+            if self.lower_bound is None and self.upper_bound is None:
+                bit_exp = self.bytes * 8 - 1
+                self.lower_bound = -(2 ** bit_exp)
+                self.upper_bound = 2 ** bit_exp - 1
+            else:
+                raise TypeError("lower_bound and upper_bound must be None when bytes is specified")
+            
+        elif self.lower_bound is None or self.upper_bound is None:
+            raise TypeError("lower_bound and upper_bound must be specified when bytes is not")
+        
         self._possibilities = self.upper_bound - self.lower_bound + 1
     
-    if urandom_available:
-        def random(self):
-            return unpack(self.unpack_fmt, urandom(self.bytes))[0]
-    else:
-        def random(self):
-            return randint(self.lower_bound, self.upper_bound)
+    def random(self):
+        if urandom_available and self.bytes:
+            value = unpack(self.unpack_fmt, urandom(self.bytes))[0]
+        else:
+            value = randint(self.lower_bound, self.upper_bound)
+        return value
     
     def possibilities(self):
         return self._possibilities
-    
-    @property
-    def bytes(self):
-        if self._bytes is None:
-            raise NotImplementedError("Subclasses must define self._bytes as an integer specifying how many bytes the integer is.")
-        return self._bytes
-    
-    @property
-    def unpack_fmt(self):
-        if self._unpack_fmt is None:
-            raise NotImplementedError("Subclasses must define self._unpack_fmt as a string to be passed directly to unpack.")
-        return self._unpack_fmt
     
     def formfield(self, **kwargs):
         defaults = {
@@ -54,16 +54,29 @@ class RandomIntegerFieldBase(RandomFieldBase):
         return super(RandomIntegerFieldBase, self).formfield(**defaults)
 
 class RandomBigIntegerField(models.BigIntegerField, RandomIntegerFieldBase):
-    _bytes = 8
-    _unpack_fmt = "=q"
+    bytes = 8
+    unpack_fmt = "=q"
 
 class RandomIntegerField(models.IntegerField, RandomIntegerFieldBase):
-    _bytes = 4
-    _unpack_fmt = "=i"
+    bytes = 4
+    unpack_fmt = "=i"
 
 class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
-    _bytes = 2
-    _unpack_fmt = "=h"
+    bytes = 2
+    unpack_fmt = "=h"
+
+class NarrowPositiveIntegerField(models.IntegerField, RandomIntegerFieldBase):
+    """
+        This field is a drop in replacement for AutoField primary keys.
+        It returns a random integer between 1,000,000,000 and 2,147,483,647.
+        These values were chosen specifically so that the string representation
+        would be fixed length without requiring zero padding.  This class is
+        meant to be used until django works more reliably with fields like
+        RandomIntegerIdentifierField which provide a larger range of values
+        but cause quirks with django like https://code.djangoproject.com/ticket/23335
+    """
+    lower_bound = 1000000000
+    upper_bound = 2147483647
 
 class IntegerIdentifierValue(str):
     def __new__(cls, value, possibilities, lower_bound, upper_bound):
