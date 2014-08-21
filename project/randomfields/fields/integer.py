@@ -67,6 +67,12 @@ class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
 
 class IntegerIdentifierValue(str):
     def __new__(self, value, possibilities, lower_bound, upper_bound):
+        # verify types are acceptable
+        value = int(value)
+        possibilities = int(possibilities)
+        lower_bound = int(lower_bound)
+        upper_bound = int(upper_bound)
+        
         # for 32 bit int, possibilities is 4,294,967,296
         # because the possible unsigned values are [0, 4294967295]
         # In this case, map 0 to 4,294,967,296 and map
