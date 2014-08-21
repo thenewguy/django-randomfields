@@ -87,9 +87,6 @@ class IntegerIdentifierValue(str):
     
     def __int__(self):
         return self.display_value
-    
-    def get_prep_value(self):
-        return self.db_value
 
 class IntegerIdentifierBase(models.Field):
     __metaclass__ = models.SubfieldBase
