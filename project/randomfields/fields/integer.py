@@ -66,7 +66,7 @@ class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
     _unpack_fmt = "=h"
 
 class IntegerIdentifierValue(str):
-    def __new__(self, value, possibilities, lower_bound, upper_bound):
+    def __new__(cls, value, possibilities, lower_bound, upper_bound):
         # verify types are acceptable
         value = int(value)
         possibilities = int(possibilities)
@@ -79,17 +79,21 @@ class IntegerIdentifierValue(str):
         # 4,294,967,295 to 8,589,934,591
         discriminator = possibilities - abs(lower_bound)
         if value < discriminator:
-            self.display_value = value + possibilities
-            self.db_value = value
+            display_value = value + possibilities
+            db_value = value
         else:
-            self.display_value = value
-            self.db_value = value - possibilities
+            display_value = value
+            db_value = value - possibilities
         
         length = len(str(possibilities + upper_bound))
         
-        display_str = str(self.display_value).zfill(length)
+        display_str = str(display_value).zfill(length)
         
-        return str.__new__(self, display_str)
+        obj = super(IntegerIdentifierValue, cls).__new__(cls, display_str)
+        obj.db_value = db_value
+        obj.display_value = display_value
+        
+        return obj
     
     def __int__(self):
         return self.display_value
