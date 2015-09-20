@@ -1,4 +1,4 @@
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.test import TransactionTestCase
 from .models import TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities
 
@@ -25,6 +25,10 @@ class SaveTests(TransactionTestCase):
         self.assertIn(obj1.unique_field, all_values)
         self.assertIn(obj2.unique_field, all_values)
         self.assertNotEqual(obj1.pk, obj2.pk)
+    
+    def test_atomic_collision_correction(self):
+        with transaction.atomic():
+            self.test_collision_correction()
     
     def test_min_length_possibilities(self):
         # ensure possibilities are calculated properly for min_length
