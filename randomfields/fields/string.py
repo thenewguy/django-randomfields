@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.six.moves import range
 from random import choice, randint
 from . import RandomFieldBase
 
@@ -19,11 +20,11 @@ class RandomCharField(models.CharField, RandomFieldBase):
             length = self.max_length
         else:
             length = randint(self.min_length, self.max_length)
-        return "".join([choice(self.valid_chars) for _ in xrange(length)])
+        return "".join([choice(self.valid_chars) for _ in range(length)])
     
     def possibilities(self):
         if self.min_length is None or self.min_length == self.max_length:
             return len(self.valid_chars) ** self.max_length
         else:
             vcl = len(self.valid_chars)
-            return sum([vcl ** n for n in xrange(self.min_length, self.max_length+1)])
+            return sum([vcl ** n for n in range(self.min_length, self.max_length+1)])
