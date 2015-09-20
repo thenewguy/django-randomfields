@@ -1,7 +1,6 @@
 language: python
 env:
   matrix:
-    - TOXENV=py27-django-14
     - TOXENV=py27-django-17
     - TOXENV=py27-django-18
     - TOXENV=py27-django-master
