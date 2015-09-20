@@ -115,7 +115,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'randomfields',
-    'randomfields.tests',
 )
 
 # A sample logging configuration. The only tangible logging
