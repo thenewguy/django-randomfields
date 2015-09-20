@@ -18,13 +18,18 @@ class RunTestsCommand(SetuptoolsTestCommand):
         import os
         import subprocess
         import sys
-
+        
+        owd = os.getcwd()
+        os.chdir(os.path.dirname(__file__))
+        
         env = os.environ.copy()
         env["PYTHONPATH"] = os.pathsep.join(sys.path)
 
         cmd = [sys.executable, 'test_project/manage.py', 'test']
         errno = subprocess.call(cmd, env=env)
-
+        
+        os.chdir(owd)
+        
         raise SystemExit(errno)
 
 setup(
