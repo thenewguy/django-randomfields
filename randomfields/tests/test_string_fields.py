@@ -1,8 +1,8 @@
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TransactionTestCase
 from .models import TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities
 
-class SaveTests(TestCase):
+class SaveTests(TransactionTestCase):
     def test_auto_primary_key(self):
         obj = TestPrimaryKey()
         obj.save()
