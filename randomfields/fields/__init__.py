@@ -44,7 +44,7 @@ class RandomFieldBase(models.Field):
                 unsaved = False
                 try:
                     cls_save(obj, *args, **kwargs)
-                except IntegrityError, e:
+                except IntegrityError as e:
                     unsaved = e
                     if self.__was_added and self.unique:
                         # 'force_insert' is required to prevent the instance from
