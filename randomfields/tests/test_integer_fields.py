@@ -1,9 +1,9 @@
-from django.test import TestCase
-
+from django.test import SimpleTestCase
+from django.utils.six.moves import range
 from randomfields.fields.integer import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField
 
-class FieldTests(TestCase):
+class FieldTests(SimpleTestCase):
     def test_big_integer_bounds(self):
         field = RandomBigIntegerField()
         self.assertEqual(field.lower_bound, -9223372036854775808)
@@ -21,21 +21,21 @@ class FieldTests(TestCase):
     
     def test_big_integer_random(self):
         field = RandomBigIntegerField()
-        for _ in xrange(10):
+        for _ in range(10):
             value = field.random()
             self.assertGreaterEqual(value, field.lower_bound)
             self.assertLessEqual(value, field.upper_bound)
     
     def test_integer_random(self):
         field = RandomIntegerField()
-        for _ in xrange(10):
+        for _ in range(10):
             value = field.random()
             self.assertGreaterEqual(value, field.lower_bound)
             self.assertLessEqual(value, field.upper_bound)
     
     def test_small_integer_random(self):
         field = RandomSmallIntegerField()
-        for _ in xrange(10):
+        for _ in range(10):
             value = field.random()
             self.assertGreaterEqual(value, field.lower_bound)
             self.assertLessEqual(value, field.upper_bound)

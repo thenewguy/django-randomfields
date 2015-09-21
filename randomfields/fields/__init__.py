@@ -1,4 +1,4 @@
-from django.db import models, IntegrityError
+from django.db import models, IntegrityError, transaction
 from math import log, ceil
 import logging
 
@@ -43,8 +43,9 @@ class RandomFieldBase(models.Field):
             while unsaved and retry:
                 unsaved = False
                 try:
-                    cls_save(obj, *args, **kwargs)
-                except IntegrityError, e:
+                    with transaction.atomic():
+                        cls_save(obj, *args, **kwargs)
+                except IntegrityError as e:
                     unsaved = e
                     if self.__was_added and self.unique:
                         # 'force_insert' is required to prevent the instance from
