@@ -1,9 +1,29 @@
 from django.test import SimpleTestCase
 from django.utils.six.moves import range
-from randomfields.fields.integer import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
+from randomfields.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField
 
 class FieldTests(SimpleTestCase):
+    def test_invalid_rifb_attrs(self):
+        class InvalidAttrs1(RandomIntegerFieldBase):
+            bytes = None
+            lower_bound = None
+            upper_bound = None
+        
+        class InvalidAttrs2(RandomIntegerFieldBase):
+            bytes = 4
+            unpack_fmt = None
+            
+        class InvalidAttrs3(RandomIntegerFieldBase):
+            bytes = 4
+            unpack_fmt = "=i"
+            lower_bound = 5
+            upper_bound = 10
+        
+        for cls in [InvalidAttrs1, InvalidAttrs2, InvalidAttrs3]:
+            with self.assertRaises(TypeError):
+                cls()
+        
     def test_big_integer_bounds(self):
         field = RandomBigIntegerField()
         self.assertEqual(field.lower_bound, -9223372036854775808)
