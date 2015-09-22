@@ -19,13 +19,14 @@ class RunTestsCommand(SetuptoolsTestCommand):
         import subprocess
         import sys
         
-        owd = os.getcwd()
-        os.chdir(os.path.dirname(__file__))
+        owd = os.path.abspath(os.getcwd())
+        nwd = os.path.abspath(os.path.dirname(__file__))
+        os.chdir(nwd)
         
         env = os.environ.copy()
         env["PYTHONPATH"] = os.pathsep.join(sys.path)
 
-        cmd = [sys.executable, 'test_project/manage.py', 'test']
+        cmd = ['coverage', 'run', os.path.abspath('test_project/manage.py'), 'test']
         errno = subprocess.call(cmd, env=env)
         
         os.chdir(owd)
@@ -38,6 +39,7 @@ setup(
     description = "Random fields for django models",
     cmdclass={'test': RunTestsCommand},
     packages=find_packages('.'),
+    tests_require=['coverage'],
     classifiers = [
         'Programming Language :: Python',
         'Operating System :: OS Independent',
