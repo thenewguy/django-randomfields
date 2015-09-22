@@ -40,38 +40,23 @@ class FieldTests(SimpleTestCase):
         self.assertEqual(field.lower_bound, -32768)
         self.assertEqual(field.upper_bound, 32767)
     
-    def test_both_random_functions(self):
-        field = RandomIntegerField()
-        val1 = field.random()
-        self.assertGreaterEqual(val1, field.lower_bound)
-        self.assertLessEqual(val1, field.upper_bound)
-        
-        # force random method to use randint instead of unpack/urandom
-        field.bytes = None
-        val2 = field.random()
-        self.assertGreaterEqual(val2, field.lower_bound)
-        self.assertLessEqual(val2, field.upper_bound)
-    
-    def test_big_integer_random(self):
-        field = RandomBigIntegerField()
-        for _ in range(10):
-            value = field.random()
-            self.assertGreaterEqual(value, field.lower_bound)
-            self.assertLessEqual(value, field.upper_bound)
-    
     def test_integer_random(self):
-        field = RandomIntegerField()
-        for _ in range(10):
-            value = field.random()
-            self.assertGreaterEqual(value, field.lower_bound)
-            self.assertLessEqual(value, field.upper_bound)
-    
-    def test_small_integer_random(self):
-        field = RandomSmallIntegerField()
-        for _ in range(10):
-            value = field.random()
-            self.assertGreaterEqual(value, field.lower_bound)
-            self.assertLessEqual(value, field.upper_bound)
+        for field_cls in [RandomIntegerField, RandomBigIntegerField, RandomSmallIntegerField]:
+            field = field_cls()
+            bytes_ = field.bytes
+            for _ in range(10):
+                val1 = field.random()
+                self.assertGreaterEqual(val1, field.lower_bound)
+                self.assertLessEqual(val1, field.upper_bound)
+                
+                # force random method to use randint instead of unpack/urandom
+                field.bytes = None
+                val2 = field.random()
+                self.assertGreaterEqual(val2, field.lower_bound)
+                self.assertLessEqual(val2, field.upper_bound)
+                
+                # reset
+                field.bytes = bytes_
     
     def _test_integer_identifier_conversions(self, field_cls, value_map):
         field = field_cls()
