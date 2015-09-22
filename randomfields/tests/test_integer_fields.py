@@ -1,7 +1,8 @@
 from django.test import SimpleTestCase
 from django.utils.six.moves import range
 from randomfields.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
-                                        RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField
+                                        RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \
+                                        NarrowPositiveIntegerField
 
 class FieldTests(SimpleTestCase):
     def test_invalid_rifb_attrs(self):
@@ -96,7 +97,7 @@ class FieldTests(SimpleTestCase):
         self._test_integer_identifier_conversions(RandomSmallIntegerIdentifierField, value_map)
     
     def test_integerfield_identifier_zfill_width(self):
-        for field_cls in (RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField):
+        for field_cls in (NarrowPositiveIntegerField, RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField):
             field = field_cls()
             lb = "%s" % field.to_python(field.lower_bound)
             ub = "%s" % field.to_python(field.upper_bound)
