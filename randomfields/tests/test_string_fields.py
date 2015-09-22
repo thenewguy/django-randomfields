@@ -8,6 +8,9 @@ from .models import TestPrimaryKey, TestUnique, TestMinLengthPossibilities, Test
 #
 
 class SaveTests(TestCase):
+    def test_travis_fails(self):
+        raise Exception("travis should show failures")
+    
     def test_auto_primary_key(self):
         obj = TestPrimaryKey()
         obj.save()
