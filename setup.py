@@ -15,19 +15,15 @@ class RunTestsCommand(SetuptoolsTestCommand):
         self.with_project_on_sys_path(self.run_tests)
 
     def run_tests(self):
+        import coverage.cmdline
         import os
-        import subprocess
-        import sys
         
         owd = os.path.abspath(os.getcwd())
         nwd = os.path.abspath(os.path.dirname(__file__))
         os.chdir(nwd)
         
-        env = os.environ.copy()
-        env["PYTHONPATH"] = os.pathsep.join(sys.path)
-
-        cmd = ['coverage', 'run', os.path.abspath('test_project/manage.py'), 'test']
-        errno = subprocess.call(cmd, env=env)
+        errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test'])
+        coverage.cmdline.main(['report', '-m'])
         
         os.chdir(owd)
         
