@@ -40,6 +40,18 @@ class FieldTests(SimpleTestCase):
         self.assertEqual(field.lower_bound, -32768)
         self.assertEqual(field.upper_bound, 32767)
     
+    def test_both_random_functions(self):
+        field = RandomIntegerField()
+        val1 = field.random()
+        self.assertGreaterEqual(val1, field.lower_bound)
+        self.assertLessEqual(val1, field.upper_bound)
+        
+        # force random method to use randint instead of unpack/urandom
+        field.bytes = None
+        val2 = field.random()
+        self.assertGreaterEqual(val2, field.lower_bound)
+        self.assertLessEqual(val2, field.upper_bound)
+    
     def test_big_integer_random(self):
         field = RandomBigIntegerField()
         for _ in range(10):
