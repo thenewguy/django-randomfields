@@ -1,6 +1,11 @@
 from django.db import IntegrityError, transaction
 from django.test import TestCase
-from .models import TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities
+from .models import TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError
+
+#
+# NEED TO CHECK AND RAISE ERROR IF MODEL DEFINED WITH AN ATTR NAMED
+# WITH THE VALUE OF Field.available_values_attname AND WRITE TEST
+#
 
 class SaveTests(TestCase):
     def test_auto_primary_key(self):
@@ -138,3 +143,18 @@ class SaveTests(TestCase):
         
         # ensure an integrity error is thrown on subsequent saves
         self.assertRaises(IntegrityError, TestFixLengthPossibilities().save)
+    
+    def test_non_unique_survives_integrity_error(self):
+        obj1 = TestNonUniqueIntegrityError()
+        obj1.unique_int_field = 1
+        obj1.save()
+        
+        obj2 = TestNonUniqueIntegrityError()
+        obj2.unique_int_field = obj1.unique_int_field
+        field2 = obj2._meta.get_field("non_unique_field")
+        val2 = field2.pre_save(obj2, True)
+        
+        with self.assertRaises(IntegrityError):
+            obj2.save()
+        
+        self.assertEqual(obj2.non_unique_field, val2)

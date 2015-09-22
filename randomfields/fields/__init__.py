@@ -110,7 +110,7 @@ class RandomFieldBase(models.Field):
                     with transaction.atomic():
                         cls_save(obj, *args, **kwargs)
                 except IntegrityError:
-                    if not retry or not hasattr(obj, self.available_values_attname):
+                    if not retry or not self.unique or not hasattr(obj, self.available_values_attname):
                         raise
                     self.set_available_value(obj)
                 else:
