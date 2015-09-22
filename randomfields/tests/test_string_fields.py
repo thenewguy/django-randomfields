@@ -15,12 +15,34 @@ class SaveTests(TestCase):
         obj.save()
         all_pks = TestPrimaryKey.objects.all().values_list("pk", flat=True)
         self.assertIn(pk, all_pks)
+        
+        with self.assertRaises(IntegrityError):
+            TestPrimaryKey.objects.create(pk=pk)
+
+    def test_collision_not_corrected_when_set_manually(self):
+        obj1 = TestUnique()
+        obj1.save()
+        obj2 = TestUnique(unique_field=obj1.unique_field)
+        with self.assertRaises(IntegrityError):
+            obj2.save()
 
     def test_collision_correction(self):
         obj1 = TestUnique()
         obj1.save()
         obj2 = TestUnique(unique_field=obj1.unique_field)
+        
+        # begin hack
+        # imitate accidental collision.  under normal circumstances,
+        # available_values will only be persisted on a model instance
+        # during Field.pre_save() or the monkeypatched instance.save().
+        # it should never be set manually because it is used to detect
+        # if collision correction should occur
+        field = obj2._meta.get_field("unique_field")
+        field.persist_available_values(obj2, set())
+        # endhack
+        
         obj2.save()
+        
         all_values = TestUnique.objects.all().values_list("unique_field", flat=True)
         self.assertIn(obj1.unique_field, all_values)
         self.assertIn(obj2.unique_field, all_values)
@@ -29,6 +51,32 @@ class SaveTests(TestCase):
     def test_atomic_collision_correction(self):
         with transaction.atomic():
             self.test_collision_correction()
+    
+    def test_available_values_persist_and_removed(self):
+        obj1 = TestUnique()
+        field1 = obj1._meta.get_field("unique_field")
+        self.assertFalse(hasattr(obj1, field1.available_values_attname))
+        
+        val1 = field1.pre_save(obj1, True)
+        self.assertTrue(val1)
+        self.assertTrue(hasattr(obj1, field1.available_values_attname))
+        
+        obj1.save()
+        self.assertEqual(val1, obj1.unique_field)
+        self.assertFalse(hasattr(obj1, field1.available_values_attname))
+    
+    def test_available_values_not_persisted(self):
+        obj1 = TestUnique(unique_field="foo")
+        field1 = obj1._meta.get_field("unique_field")
+        self.assertFalse(hasattr(obj1, field1.available_values_attname))
+        
+        val1 = field1.pre_save(obj1, True)
+        self.assertEqual(val1, "foo")
+        self.assertFalse(hasattr(obj1, field1.available_values_attname))
+        
+        obj1.save()
+        self.assertEqual(val1, obj1.unique_field)
+        self.assertFalse(hasattr(obj1, field1.available_values_attname))
     
     def test_min_length_possibilities(self):
         # ensure possibilities are calculated properly for min_length
