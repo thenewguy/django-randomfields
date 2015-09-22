@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 from django.utils.six.moves import range
 from randomfields.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
@@ -39,6 +40,21 @@ class FieldTests(SimpleTestCase):
         field = RandomSmallIntegerField()
         self.assertEqual(field.lower_bound, -32768)
         self.assertEqual(field.upper_bound, 32767)
+    
+    def test_integer_formfield_bounds(self):
+        for field_cls in [RandomIntegerField, RandomBigIntegerField, RandomSmallIntegerField]:
+            field = field_cls()
+            form_field = field.formfield()
+            
+            # no exceptions
+            form_field.clean(field.lower_bound)
+            form_field.clean(field.upper_bound)
+            form_field.clean((field.upper_bound + field.lower_bound) / 2)# shows a value between lower/upper bounds is valid
+            
+            with self.assertRaises(ValidationError):
+                form_field.clean(field.lower_bound-1)
+            with self.assertRaises(ValidationError):
+                form_field.clean(field.upper_bound+1)
     
     def test_integer_random(self):
         for field_cls in [RandomIntegerField, RandomBigIntegerField, RandomSmallIntegerField]:
