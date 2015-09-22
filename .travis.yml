@@ -12,9 +12,9 @@ env:
     - TOXENV=py35-django-master
     fast_finish: true
     allow_failures:
-        - TOXENV=py27-django-master
-        - TOXENV=py34-django-master
-        - TOXENV=py35-django-master
+      - TOXENV=py27-django-master
+      - TOXENV=py34-django-master
+      - TOXENV=py35-django-master
   global:
     - PIP_WHEEL_DIR=$HOME/.wheels
     - PIP_FIND_LINKS=file://$HOME/.wheels
