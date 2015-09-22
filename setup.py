@@ -35,6 +35,7 @@ setup(
     description = "Random fields for django models",
     cmdclass={'test': RunTestsCommand},
     packages=find_packages('.'),
+    install_requires=['django'],
     tests_require=['coverage'],
     classifiers = [
         'Programming Language :: Python',
