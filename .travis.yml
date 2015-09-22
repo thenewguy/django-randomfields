@@ -16,8 +16,6 @@ env:
     - PIP_FIND_LINKS=file://$HOME/.wheels
 install:
     - mkdir -p $PIP_WHEEL_DIR
-    - pip install tox coveralls
+    - pip install tox
 script:
   - tox
-after_success:
-  - coveralls
