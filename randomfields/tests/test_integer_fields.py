@@ -49,7 +49,8 @@ class FieldTests(SimpleTestCase):
             # no exceptions
             form_field.clean(field.lower_bound)
             form_field.clean(field.upper_bound)
-            form_field.clean((field.upper_bound + field.lower_bound) / 2)# shows a value between lower/upper bounds is valid
+            for value in [int(field.lower_bound + p * (field.possibilities() - 2)) for p in (.1, .3, .5, .7, .9)]:
+                form_field.clean(value)
             
             with self.assertRaises(ValidationError):
                 form_field.clean(field.lower_bound-1)
