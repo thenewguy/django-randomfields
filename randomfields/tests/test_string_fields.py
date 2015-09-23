@@ -2,6 +2,11 @@ from django.db import IntegrityError, transaction
 from django.test import TestCase
 from .models import TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 #
 # NEED TO CHECK AND RAISE ERROR IF MODEL DEFINED WITH AN ATTR NAMED
 # WITH THE VALUE OF Field.available_values_attname AND WRITE TEST
@@ -82,6 +87,31 @@ class SaveTests(TestCase):
         obj1.save()
         self.assertEqual(val1, obj1.unique_field)
         self.assertFalse(hasattr(obj1, field1.available_values_attname))
+    
+    @mock.patch('randomfields.fields.logger')
+    def test_warn_at_percent(self, mocked_logger):
+        obj1 = TestMinLengthPossibilities()
+        self.assertEqual(obj1._meta.get_field("data").valid_chars, "ab")
+        self.assertEqual(obj1._meta.get_field("data").max_length, 2)
+        self.assertEqual(obj1._meta.get_field("data").min_length, 1)
+        self.assertEqual(6, obj1._meta.get_field("data").possibilities())
+        self.assertEqual(0, TestMinLengthPossibilities.objects.count())
+        
+        warn_at = 0.55
+        
+        for i in (1, 2, 3, 4, 5, 6, 7):
+            obj = TestMinLengthPossibilities()
+            obj._meta.get_field("data").warn_at_percent = warn_at
+            if i == 7:
+                with self.assertRaises(IntegrityError):
+                    obj.save()
+            else:
+                obj.save()
+                if i < 5:
+                    self.assertFalse(mocked_logger.warning.called)
+                else:
+                    count = i - 4# 4==1, 5==2, 6==3
+                    self.assertEqual(count, mocked_logger.warning.call_count)
     
     def test_min_length_possibilities(self):
         # ensure possibilities are calculated properly for min_length
