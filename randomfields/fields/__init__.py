@@ -2,6 +2,8 @@ from django.db import models, IntegrityError, transaction
 from math import log, ceil
 import logging
 
+logger = logging.getLogger(".".join(("django", __name__)))
+
 class RandomFieldBase(models.Field):
     empty_strings_allowed = False
     
@@ -45,7 +47,7 @@ class RandomFieldBase(models.Field):
             percent_used = t / a
             if self.warn_at_percent < percent_used:
                 remaining_choices = possibilities - t
-                logging.warning("%.2f%% of the choices for field '%s' on %r are taken.  There %s remaining." % (
+                logger.warning("%.2f%% of the choices for field '%s' on %r are taken.  There %s remaining." % (
                         percent_used * 100,
                         self.attname,
                         model_cls,
