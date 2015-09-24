@@ -18,12 +18,16 @@ class RunTestsCommand(SetuptoolsTestCommand):
     def run_tests(self):
         import coverage.cmdline
         import os
+        import sys
         
         owd = os.path.abspath(os.getcwd())
         nwd = os.path.abspath(os.path.dirname(__file__))
         os.chdir(nwd)
         
-        errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test', nwd, os.path.abspath('test_project')])
+        pwd = os.path.abspath('test_project')
+        sys.path.insert(1, pwd)
+        
+        errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test', nwd, pwd])
         coverage.cmdline.main(['report', '-m'])
         
         os.chdir(owd)
