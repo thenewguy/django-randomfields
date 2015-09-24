@@ -135,6 +135,9 @@ class IntegerIdentifierBase(models.Field):
             value = value.db_value
         return value
     
+    def from_db_value(self, value, *args):
+        return self.to_python(value)
+    
     def formfield(self, **kwargs):
         defaults = {
             'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities(), self.lower_bound, self.upper_bound),
