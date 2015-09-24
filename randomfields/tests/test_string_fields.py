@@ -37,10 +37,10 @@ class SaveTests(TestCase):
             text = text_type(value)
             self.assertEqual(data.get(key, None), text, "Key '{}' did not match '{}' in the following dict: {}".format(key, text, data))
         
-    def test_identifier_expected_values_o2o_primary_key_id(self):
+    def test_identifier_expected_values_primary_key_by_fieldname(self):
         self._test_identifier_expected_values(TestIdentifierValue, "id")
         
-    def test_identifier_expected_values_o2o_primary_key_pk(self):
+    def test_identifier_expected_values_primary_key_by_pk(self):
         self._test_identifier_expected_values(TestIdentifierValue, "pk")
             
     def test_auto_primary_key(self):
