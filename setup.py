@@ -23,7 +23,7 @@ class RunTestsCommand(SetuptoolsTestCommand):
         nwd = os.path.abspath(os.path.dirname(__file__))
         os.chdir(nwd)
         
-        errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test'])
+        errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test', nwd, os.path.abspath('test_project')])
         coverage.cmdline.main(['report', '-m'])
         
         os.chdir(owd)
