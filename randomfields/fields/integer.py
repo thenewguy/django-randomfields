@@ -114,8 +114,7 @@ class IntegerIdentifierValue(text_type):
         return self.db_value
 
 class IntegerIdentifierBase(models.Field):
-    if DJANGO_VERSION < (1, 8):
-        __metaclass__ = models.SubfieldBase
+    __metaclass__ = models.SubfieldBase
         
     def to_python(self, value):
         if value is not None and not isinstance(value, IntegerIdentifierValue):
