@@ -50,4 +50,4 @@ class TestIdentifierM2MO2OValue(models.Model):
 
 class TestIdentifierM2MFKValue(models.Model):
     fk = models.ForeignKey(TestIdentifierValue, related_name='+')
-    m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=uuid4().hex)
+    m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name='+')
