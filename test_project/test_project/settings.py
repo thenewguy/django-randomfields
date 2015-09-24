@@ -53,7 +53,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+#    'django.middleware.security.SecurityMiddleware',# Raises 'ImportError: No module named security' on DJ1.7 (obviously, since added in 1.8)
 )
 
 ROOT_URLCONF = 'test_project.urls'
