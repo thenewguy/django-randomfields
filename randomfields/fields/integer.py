@@ -116,23 +116,13 @@ class IntegerIdentifierBase(models.Field):
     __metaclass__ = models.SubfieldBase
         
     def to_python(self, value):
-        """
-            Deal gracefully with any of the following arguments:
-                - An instance of the correct type (e.g., Hand in our ongoing example).
-                - A string (e.g., from a deserializer).
-                - Whatever the database returns for the column type you're using.
-        """
         if value is not None and not isinstance(value, IntegerIdentifierValue):
-            value = super(IntegerIdentifierBase, self).to_python(value)
             value = IntegerIdentifierValue(value, self.possibilities(), self.lower_bound, self.upper_bound)
-        
         return value
     
     def get_prep_value(self, value):
         if value is not None:
-            if not isinstance(value, IntegerIdentifierValue):
-                value = self.to_python(value)
-            value = value.db_value
+            value = self.to_python(value).db_value
         return value
     
     def from_db_value(self, value, *args):
