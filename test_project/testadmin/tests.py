@@ -30,14 +30,12 @@ class AdminTests(TestCase):
         soup = BeautifulSoup(response.content, 'html5lib')
         options = soup.find_all('option', value=value)
         self.assertTrue(options)
-        selected_options = []
         for option in options:
-            print(option)
             try:
-                selected_options.append(option["selected"] == "selected")
+                selected = option["selected"]
             except KeyError:
-                selected_options.append(False)
-        self.assertTrue(all(selected_options))
+                selected = "Key error.  Option html: %s" % option
+            self.assertEqual(selected, "selected")
     
     def test_identifier_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
