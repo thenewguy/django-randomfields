@@ -1,3 +1,4 @@
+from django import VERSION as DJANGO_VERSION
 from django.db import models
 from django.utils.six import text_type
 from . import RandomFieldBase
@@ -113,11 +114,8 @@ class IntegerIdentifierValue(text_type):
         return self.db_value
 
 class IntegerIdentifierBase(models.Field):
-    try:
+    if DJANGO_VERSION < (1, 8):
         __metaclass__ = models.SubfieldBase
-    except AttributeError:
-        # models.SubfieldBase does not exist in Django 1.9
-        pass
         
     def to_python(self, value):
         if value is not None and not isinstance(value, IntegerIdentifierValue):
