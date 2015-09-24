@@ -70,7 +70,14 @@ class AdminTests(TestCase):
         rel = TestIdentifierM2MO2OPKValue.objects.create(pk=obj)
         rel.m2m.add(obj)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
-    
+
+    @skip("Known to fail. Need to figure out why it passes a model instance to the database and how to handle it.")
+    def test_identifier_m2m_o2oid_html(self):
+        obj = TestIdentifierValue.objects.create()
+        rel = TestIdentifierM2MO2OPKValue.objects.create(id=obj)
+        rel.m2m.add(obj)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+
     def test_identifier_m2m_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MO2OValue.objects.create(o2o=obj)
