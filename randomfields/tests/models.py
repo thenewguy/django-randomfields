@@ -1,6 +1,7 @@
 from django.db import models
 from randomfields.fields.string import RandomCharField
 from randomfields.fields.integer import RandomIntegerIdentifierField
+from uuid import uuid4
 
 class TestPrimaryKey(models.Model):
     id = RandomCharField(primary_key=True, max_length=10)
@@ -35,10 +36,18 @@ class TestIdentifierM2MValue(models.Model):
     data = models.ManyToManyField(TestIdentifierValue, blank=True)
 
 class TestIdentifierAllValue(models.Model):
-    o2o = models.OneToOneField(TestIdentifierValue, related_name='+')
-    fk = models.ForeignKey(TestIdentifierValue, related_name='+')
-    m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name='+')
+    o2o = models.OneToOneField(TestIdentifierValue, related_name=uuid4().hex)
+    fk = models.ForeignKey(TestIdentifierValue, related_name=uuid4().hex)
+    m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=uuid4().hex)
+
+class TestIdentifierM2MO2OPKValue(models.Model):
+    id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=True, related_name=uuid4().hex)
+    m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=uuid4().hex)
 
 class TestIdentifierM2MO2OValue(models.Model):
-    id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=False, related_name='+')
-    m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name='+')
+    o2o = models.OneToOneField(TestIdentifierValue, related_name=uuid4().hex)
+    m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=uuid4().hex)
+
+class TestIdentifierM2MFKValue(models.Model):
+    fk = models.ForeignKey(TestIdentifierValue, related_name=uuid4().hex)
+    m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=uuid4().hex)

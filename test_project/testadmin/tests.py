@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from randomfields.tests.models import TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
+from randomfields.tests.models import TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 
 class DatabaseTest(TestCase):
     def test_superuser_exists(self):
@@ -59,9 +59,21 @@ class AdminTests(TestCase):
         rel.m2m.add(obj)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
     
+    def test_identifier_m2m_o2opk_html(self):
+        obj = TestIdentifierValue.objects.create()
+        rel = TestIdentifierM2MO2OPKValue.objects.create(id=obj)
+        rel.m2m.add(obj)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
+    
     def test_identifier_m2m_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
-        rel = TestIdentifierM2MO2OValue.objects.create(id=obj)
+        rel = TestIdentifierM2MO2OValue.objects.create(o2o=obj)
+        rel.m2m.add(obj)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
+    
+    def test_identifier_m2m_fk_html(self):
+        obj = TestIdentifierValue.objects.create()
+        rel = TestIdentifierM2MFKValue.objects.create(fk=obj)
         rel.m2m.add(obj)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
         
