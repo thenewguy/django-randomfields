@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils.six import text_type
 from randomfields.tests.models import TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 
 class DatabaseTest(TestCase):
@@ -26,6 +27,9 @@ class AdminTests(TestCase):
         return reverse(self.get_admin_url(obj, "change"), args=(obj.pk,))
     
     def _test_identifier_selected_in_html(self, url, value):
+        print type(value)
+        value = text_type(value)
+        print type(value)
         response = self.client.get(url)
         soup = BeautifulSoup(response.content, 'html5lib')
         options = soup.find_all('option', value=value)
