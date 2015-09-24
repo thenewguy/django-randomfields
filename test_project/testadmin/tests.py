@@ -27,9 +27,9 @@ class AdminTests(TestCase):
         return reverse(self.get_admin_url(obj, "change"), args=(obj.pk,))
     
     def _test_identifier_selected_in_html(self, url, value):
-        print type(value)
+        print(type(value))
         value = text_type(value)
-        print type(value)
+        print(type(value))
         response = self.client.get(url)
         soup = BeautifulSoup(response.content, 'html5lib')
         options = soup.find_all('option', value=value)
