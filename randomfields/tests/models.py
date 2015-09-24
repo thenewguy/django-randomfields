@@ -29,6 +29,9 @@ class TestFixLengthPossibilities(models.Model):
 class TestIdentifierValue(models.Model):
     id = RandomIntegerIdentifierField(primary_key=True, editable=True)
 
+class TestIdentifierData(models.Model):
+    data = RandomIntegerIdentifierField()
+
 class TestIdentifierO2OValue(models.Model):
     id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=True)
 
