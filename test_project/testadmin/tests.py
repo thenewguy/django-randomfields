@@ -32,7 +32,7 @@ class AdminTests(TestCase):
         self.assertTrue(options)
         selected_options = []
         for option in options:
-            print option
+            print(option)
             try:
                 selected_options.append(option["selected"] == "selected")
             except KeyError:
