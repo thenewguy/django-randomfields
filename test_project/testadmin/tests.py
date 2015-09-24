@@ -44,40 +44,40 @@ class AdminTests(TestCase):
     def test_identifier_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierO2OValue.objects.create(id=obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
     
     def test_identifier_fk_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierFKValue.objects.create(data=obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
     
     def test_identifier_m2m_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MValue.objects.create()
         rel.data.add(obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
     
     def test_identifier_all_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierAllValue.objects.create(o2o=obj, fk=obj)
         rel.m2m.add(obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
     
     def test_identifier_m2m_o2opk_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MO2OPKValue.objects.create(id=obj)
         rel.m2m.add(obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
     
     def test_identifier_m2m_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MO2OValue.objects.create(o2o=obj)
         rel.m2m.add(obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
     
     def test_identifier_m2m_fk_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MFKValue.objects.create(fk=obj)
         rel.m2m.add(obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
         
