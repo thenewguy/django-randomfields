@@ -115,4 +115,6 @@ class FieldTests(SimpleTestCase):
             field = field_cls()
             lb = "%s" % field.to_python(field.lower_bound)
             ub = "%s" % field.to_python(field.upper_bound)
-            self.assertEqual(len(lb), len(ub))
+            lb_len = len(lb)
+            ub_len = len(ub)
+            self.assertEqual(lb_len, ub_len, "{} and {} are of different string width, {} != {}".format(lb, ub, lb_len, ub_len))
