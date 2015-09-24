@@ -3,7 +3,7 @@ from django.forms.models import model_to_dict
 from django.test import TestCase
 from django.utils.six import text_type
 from randomfields.fields.integer import IntegerIdentifierValue
-from .models import TestIdentifierO2OValue, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
+from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
 
 try:
     from unittest import mock
@@ -24,24 +24,34 @@ class SaveTests(TestCase):
         )
         
         for db_value, display_value in value_map:
-            obj = model_class(**{attr: display_value})
-            obj.save()
+            self.assertFalse(model_class.objects.filter(**{attr: display_value}).exists())
+            self.assertFalse(model_class.objects.filter(**{attr: db_value}).exists())
             
-            value = getattr(obj, attr)
-            self.assertTrue(isinstance(value, IntegerIdentifierValue), "Object attribute '%s' was not an instance of IntegerIdentifierValue.  It was type %r" % (attr, type(value)))
-            self.assertEqual(value.display_value, display_value)
-            self.assertEqual(value.db_value, db_value)
+            obj1 = model_class(**{attr: display_value})
+            obj1.save()
             
-            key = 'id' if attr == "pk" else attr
-            data = model_to_dict(obj)
-            text = text_type(value)
-            self.assertEqual(data.get(key, None), text, "Key '{}' did not match '{}' in the following dict: {}".format(key, text, data))
+            self.assertTrue(model_class.objects.filter(**{attr: db_value}).exists())
+            obj2 = model_class.objects.get(**{attr: db_value})
+            
+            for obj in (obj1, obj2):
+                value = getattr(obj, attr)
+                self.assertTrue(isinstance(value, IntegerIdentifierValue), "Object attribute '%s' was not an instance of IntegerIdentifierValue.  It was type %r" % (attr, type(value)))
+                self.assertEqual(value.display_value, display_value)
+                self.assertEqual(value.db_value, db_value)
+                
+                key = 'id' if attr == "pk" else attr
+                data = model_to_dict(obj)
+                text = text_type(value)
+                self.assertEqual(data.get(key, None), text, "Key '{}' did not match '{}' in the following dict: {}".format(key, text, data))
         
     def test_identifier_expected_values_primary_key_by_fieldname(self):
         self._test_identifier_expected_values(TestIdentifierValue, "id")
         
     def test_identifier_expected_values_primary_key_by_pk(self):
         self._test_identifier_expected_values(TestIdentifierValue, "pk")
+    
+    def test_identifier_expected_values_data(self):
+        self._test_identifier_expected_values(TestIdentifierData, "data")
             
     def test_auto_primary_key(self):
         obj = TestPrimaryKey()
