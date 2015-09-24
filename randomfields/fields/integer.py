@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.six import text_type
 from . import RandomFieldBase
 from random import randint
 from os import urandom
@@ -78,7 +79,7 @@ class NarrowPositiveIntegerField(models.IntegerField, RandomIntegerFieldBase):
     lower_bound = 1000000000
     upper_bound = 2147483647
 
-class IntegerIdentifierValue(str):
+class IntegerIdentifierValue(text_type):
     def __new__(cls, value, possibilities, lower_bound, upper_bound):
         # verify types are acceptable
         value = int(value)
@@ -98,9 +99,9 @@ class IntegerIdentifierValue(str):
             display_value = value
             db_value = value - possibilities
         
-        length = len(str(possibilities + upper_bound))
+        length = len(text_type(possibilities + upper_bound))
         
-        display_str = str(display_value).zfill(length)
+        display_str = text_type(display_value).zfill(length)
         
         obj = super(IntegerIdentifierValue, cls).__new__(cls, display_str)
         obj.db_value = db_value
