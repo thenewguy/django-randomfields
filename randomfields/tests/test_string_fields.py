@@ -1,6 +1,9 @@
 from django.db import IntegrityError, transaction
+from django.forms.models import model_to_dict
 from django.test import TestCase
-from .models import TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
+from django.utils.six import text_type
+from randomfields.fields.integer import IntegerIdentifierValue
+from .models import TestIdentifierO2OValue, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
 
 try:
     from unittest import mock
@@ -13,6 +16,35 @@ except ImportError:
 #
 
 class SaveTests(TestCase):
+    def test_identifier_expected_values(self):
+        value_map = (
+            (-2147483648, 2147483648),
+            (0, 4294967296),
+            (2147483647, 6442450943),
+        )
+        
+        for db_value, display_value in value_map:
+            obj = TestIdentifierValue(pk=display_value)
+            obj.save()
+            
+            for attr in ("id", "pk"):
+                value = getattr(obj, attr)
+                self.assertTrue(isinstance(value, IntegerIdentifierValue), "Object attribute '%s' was not an instance of IntegerIdentifierValue.  It was type %r" % (attr, type(value)))
+                self.assertEqual(value.display_value, display_value)
+                self.assertEqual(value.db_value, db_value)
+            
+            self.assertEqual(model_to_dict(obj), {'id': text_type(value)})
+            
+            rel1 = TestIdentifierO2OValue(id=obj)
+            rel1.save()
+            rel2 = TestIdentifierO2OValue.objects.get(id=obj)
+            
+            for rel in (rel1, rel2):
+                self.assertEqual(rel.id, obj)
+                self.assertTrue(isinstance(rel.pk, IntegerIdentifierValue))
+                self.assertEqual(rel.pk.display_value, display_value)
+                self.assertEqual(rel.pk.db_value, db_value)
+            
     def test_auto_primary_key(self):
         obj = TestPrimaryKey()
         obj.save()
