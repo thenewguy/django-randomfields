@@ -29,7 +29,7 @@ class AdminTests(TestCase):
         response = self.client.get(url)
         soup = BeautifulSoup(response.content, 'html5lib')
         options = soup.find_all('option', value=value)
-        self.assertTrue(options)
+        self.assertTrue(options, "No options found with value '%s'.  All options: %s" % (value, soup.find_all('option')))
         for option in options:
             try:
                 selected = option["selected"]
