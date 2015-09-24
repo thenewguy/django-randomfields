@@ -23,7 +23,7 @@ sys.path.insert(1, os.path.abspath(os.path.join(BASE_DIR, "../")))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '2-4xr@ipi*k*a+5d3y^l1mx%o79lff2-16(7+!1cnmsn2))+l0'
+SECRET_KEY = 'not-so-secret'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,6 +41,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'randomfields',
+    'randomfields.tests',
+    'testadmin',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -104,3 +106,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+SUPERUSER_USERNAME = "admin"
+SUPERUSER_EMAIL = "admin@example.com"
+SUPERUSER_PASSWORD = "admin"

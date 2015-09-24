@@ -30,7 +30,7 @@ class RunTestsCommand(SetuptoolsTestCommand):
         
         raise SystemExit(errno)
 
-tests_require = ['coverage']
+tests_require = ['coverage', 'beautifulsoup4', 'html5lib']
 if version_info < (3, 3):
     tests_require = tests_require + ['mock', 'pbr<1.7.0']
 
