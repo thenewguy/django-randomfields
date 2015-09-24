@@ -35,16 +35,6 @@ class SaveTests(TestCase):
             
             self.assertEqual(model_to_dict(obj), {'id': text_type(value)})
             
-            rel1 = TestIdentifierO2OValue(id=obj)
-            rel1.save()
-            rel2 = TestIdentifierO2OValue.objects.get(id=obj)
-            
-            for rel in (rel1, rel2):
-                self.assertEqual(rel.id, obj)
-                self.assertTrue(isinstance(rel.pk, IntegerIdentifierValue))
-                self.assertEqual(rel.pk.display_value, display_value)
-                self.assertEqual(rel.pk.db_value, db_value)
-            
     def test_auto_primary_key(self):
         obj = TestPrimaryKey()
         obj.save()
