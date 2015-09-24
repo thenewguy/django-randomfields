@@ -1,4 +1,4 @@
-from django import VERSION as DJANGO_VERSION, forms
+from django import VERSION as DJANGO_VERSION
 from django.db import models
 from django.utils.six import text_type
 from . import RandomFieldBase
@@ -129,14 +129,10 @@ class IntegerIdentifierBase(models.Field):
         return self.to_python(value)
     
     def formfield(self, **kwargs):
-        """
         defaults = {
             'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities(), self.lower_bound, self.upper_bound),
             'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities(), self.lower_bound, self.upper_bound),
         }
-        """
-        # the value should not be coerced to an integer
-        defaults = {'form_class': forms.CharField}
         defaults.update(kwargs)
         return super(IntegerIdentifierBase, self).formfield(**defaults)
 
