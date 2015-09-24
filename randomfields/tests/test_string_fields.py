@@ -16,7 +16,7 @@ except ImportError:
 #
 
 class SaveTests(TestCase):
-    def test_identifier_expected_values(self):
+    def _test_identifier_expected_values(self, attr):
         value_map = (
             (-2147483648, 2147483648),
             (0, 4294967296),
@@ -27,13 +27,17 @@ class SaveTests(TestCase):
             obj = TestIdentifierValue(pk=display_value)
             obj.save()
             
-            for attr in ("id", "pk"):
-                value = getattr(obj, attr)
-                self.assertTrue(isinstance(value, IntegerIdentifierValue), "Object attribute '%s' was not an instance of IntegerIdentifierValue.  It was type %r" % (attr, type(value)))
-                self.assertEqual(value.display_value, display_value)
-                self.assertEqual(value.db_value, db_value)
-            
+            value = getattr(obj, attr)
+            self.assertTrue(isinstance(value, IntegerIdentifierValue), "Object attribute '%s' was not an instance of IntegerIdentifierValue.  It was type %r" % (attr, type(value)))
+            self.assertEqual(value.display_value, display_value)
+            self.assertEqual(value.db_value, db_value)
             self.assertEqual(model_to_dict(obj), {'id': text_type(value)})
+        
+    def test_identifier_expected_values_id(self):
+        self._test_identifier_expected_values("id")
+        
+    def test_identifier_expected_values_pk(self):
+        self._test_identifier_expected_values("pk")    
             
     def test_auto_primary_key(self):
         obj = TestPrimaryKey()
