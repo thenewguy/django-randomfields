@@ -16,7 +16,7 @@ except ImportError:
 #
 
 class SaveTests(TestCase):
-    def _test_identifier_expected_values(self, attr):
+    def _test_identifier_expected_values(self, model_class, attr):
         value_map = (
             (-2147483648, 2147483648),
             (0, 4294967296),
@@ -24,20 +24,24 @@ class SaveTests(TestCase):
         )
         
         for db_value, display_value in value_map:
-            obj = TestIdentifierValue(pk=display_value)
+            obj = model_class(**{attr: display_value})
             obj.save()
             
             value = getattr(obj, attr)
             self.assertTrue(isinstance(value, IntegerIdentifierValue), "Object attribute '%s' was not an instance of IntegerIdentifierValue.  It was type %r" % (attr, type(value)))
             self.assertEqual(value.display_value, display_value)
             self.assertEqual(value.db_value, db_value)
-            self.assertEqual(model_to_dict(obj), {'id': text_type(value)})
+            
+            key = 'id' if attr == "pk" else attr
+            data = model_to_dict(obj)
+            text = text_type(value)
+            self.assertEqual(data.get(key, None), text, "Key '{}' did not match '{}' in the following dict: {}".format(key, text, data))
         
-    def test_identifier_expected_values_id(self):
-        self._test_identifier_expected_values("id")
+    def test_identifier_expected_values_o2o_primary_key_id(self):
+        self._test_identifier_expected_values(TestIdentifierValue, "id")
         
-    def test_identifier_expected_values_pk(self):
-        self._test_identifier_expected_values("pk")    
+    def test_identifier_expected_values_o2o_primary_key_pk(self):
+        self._test_identifier_expected_values(TestIdentifierValue, "pk")
             
     def test_auto_primary_key(self):
         obj = TestPrimaryKey()
