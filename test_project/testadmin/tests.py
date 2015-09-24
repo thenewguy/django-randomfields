@@ -33,7 +33,7 @@ class AdminTests(TestCase):
         selected_options = []
         for option in options:
             try:
-                selected_options.append(option["selected"])
+                selected_options.append(option["selected"] == "selected")
             except KeyError:
                 selected_options.append(False)
         self.assertTrue(all(selected_options))
