@@ -36,18 +36,18 @@ class TestIdentifierM2MValue(models.Model):
     data = models.ManyToManyField(TestIdentifierValue, blank=True)
 
 class TestIdentifierAllValue(models.Model):
-    o2o = models.OneToOneField(TestIdentifierValue, related_name=uuid4().hex)
-    fk = models.ForeignKey(TestIdentifierValue, related_name=uuid4().hex)
+    o2o = models.OneToOneField(TestIdentifierValue, related_name='+')
+    fk = models.ForeignKey(TestIdentifierValue, related_name='+')
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=uuid4().hex)
 
 class TestIdentifierM2MO2OPKValue(models.Model):
-    id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=True, related_name=uuid4().hex)
+    id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=True, related_name='+')
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=uuid4().hex)
 
 class TestIdentifierM2MO2OValue(models.Model):
-    o2o = models.OneToOneField(TestIdentifierValue, related_name=uuid4().hex)
+    o2o = models.OneToOneField(TestIdentifierValue, related_name='+')
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=uuid4().hex)
 
 class TestIdentifierM2MFKValue(models.Model):
-    fk = models.ForeignKey(TestIdentifierValue, related_name=uuid4().hex)
+    fk = models.ForeignKey(TestIdentifierValue, related_name='+')
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=uuid4().hex)
