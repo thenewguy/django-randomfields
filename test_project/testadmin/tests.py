@@ -55,7 +55,7 @@ class AdminTests(TestCase):
     
     def test_identifier_all_html(self):
         obj = TestIdentifierValue.objects.create()
-        rel = TestIdentifierAllValue.objects.create(id=obj, fk=obj)
+        rel = TestIdentifierAllValue.objects.create(o2o=obj, fk=obj)
         rel.m2m.add(obj)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
         
