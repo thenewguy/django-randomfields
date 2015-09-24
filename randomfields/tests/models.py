@@ -38,3 +38,7 @@ class TestIdentifierAllValue(models.Model):
     o2o = models.OneToOneField(TestIdentifierValue, related_name='+')
     fk = models.ForeignKey(TestIdentifierValue, related_name='+')
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name='+')
+
+class TestIdentifierM2MO2OValue(models.Model):
+    id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=False, related_name='+')
+    m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name='+')
