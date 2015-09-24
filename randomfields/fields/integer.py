@@ -116,7 +116,11 @@ class IntegerIdentifierValue(text_type):
         return value
 
 class IntegerIdentifierBase(models.Field):
-    __metaclass__ = models.SubfieldBase
+    try:
+        __metaclass__ = models.SubfieldBase
+    except AttributeError:
+        # models.SubfieldBase does not exist in Django 1.9
+        pass
         
     def to_python(self, value):
         if value is not None and not isinstance(value, IntegerIdentifierValue):
