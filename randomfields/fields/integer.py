@@ -110,10 +110,7 @@ class IntegerIdentifierValue(text_type):
         return obj
     
     def __int__(self):
-        value = self.db_value
-        value.__str__ = lambda obj: self
-        value.__unicode__ = value.__str__
-        return value
+        return self.db_value
 
 class IntegerIdentifierBase(models.Field):
     try:
@@ -128,9 +125,7 @@ class IntegerIdentifierBase(models.Field):
         return value
     
     def get_prep_value(self, value):
-        if value is not None:
-            value = self.to_python(value).db_value
-        return value
+        return self.to_python(value)
     
     def from_db_value(self, value, *args):
         return self.to_python(value)
