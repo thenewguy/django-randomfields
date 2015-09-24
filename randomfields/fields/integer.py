@@ -110,7 +110,7 @@ class IntegerIdentifierValue(text_type):
         return obj
     
     def __int__(self):
-        return self.display_value
+        return self.db_value
 
 class IntegerIdentifierBase(models.Field):
     __metaclass__ = models.SubfieldBase
