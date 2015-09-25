@@ -5,7 +5,6 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils.six import text_type
 from randomfields.tests.models import TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
-from unittest import skip
 
 class DatabaseTest(TestCase):
     def test_superuser_exists(self):
@@ -28,9 +27,6 @@ class AdminTests(TestCase):
         return reverse(self.get_admin_url(obj, "change"), args=(obj.pk,))
     
     def _test_identifier_selected_in_html(self, url, value):
-        print(type(value))
-        value = text_type(value)
-        print(type(value))
         response = self.client.get(url)
         soup = BeautifulSoup(response.content, 'html5lib')
         options = soup.find_all('option', value=value)
@@ -45,39 +41,43 @@ class AdminTests(TestCase):
     def test_identifier_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierO2OValue.objects.create(id=obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
     def test_identifier_fk_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierFKValue.objects.create(data=obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
     def test_identifier_m2m_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MValue.objects.create()
         rel.data.add(obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
     def test_identifier_all_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierAllValue.objects.create(o2o=obj, fk=obj)
         rel.m2m.add(obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
-    @skip("Known to fail. Need to figure out why it passes a model instance to the field's get_prep_value and how to handle it.")
     def test_identifier_m2m_o2opk_html(self):
-        obj = TestIdentifierValue.objects.create()
-        rel = TestIdentifierM2MO2OPKValue.objects.create(pk=obj)
-        rel.m2m.add(obj)
-        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
-
-    @skip("Known to fail. Need to figure out why it passes a model instance to the database and how to handle it.")
-    def test_identifier_m2m_o2oid_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MO2OPKValue.objects.create(id=obj)
         rel.m2m.add(obj)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
 
+    def test_identifier_m2m_o2oid_html_pk(self):
+        obj = TestIdentifierValue.objects.create()
+        rel = TestIdentifierM2MO2OPKValue.objects.create(pk=obj.pk)
+        rel.m2m.add(obj)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+    
+    def test_identifier_m2m_o2oid_html_id(self):
+        obj = TestIdentifierValue.objects.create()
+        rel = TestIdentifierM2MO2OPKValue.objects.create(id=obj)
+        rel.m2m.add(obj)
+        self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
+    
     def test_identifier_m2m_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MO2OValue.objects.create(o2o=obj)

@@ -47,7 +47,7 @@ class TestIdentifierAllValue(models.Model):
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=unique_related_name())
 
 class TestIdentifierM2MO2OPKValue(models.Model):
-    id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=True, related_name='+')
+    id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=True, related_name=unique_related_name())
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=unique_related_name())
 
 class TestIdentifierM2MO2OValue(models.Model):

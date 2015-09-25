@@ -42,7 +42,7 @@ class SaveTests(TestCase):
                 key = 'id' if attr == "pk" else attr
                 data = model_to_dict(obj)
                 text = text_type(value)
-                self.assertEqual(data.get(key, None), text, "Key '{}' did not match '{}' in the following dict: {}".format(key, text, data))
+                self.assertEqual(data.get(key, None), value, "Key '{}' did not match integer id '{}' in the following dict: {}".format(key, text, data))
         
     def test_identifier_expected_values_primary_key_by_fieldname(self):
         self._test_identifier_expected_values(TestIdentifierValue, "id")

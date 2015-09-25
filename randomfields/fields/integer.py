@@ -1,6 +1,5 @@
-from django import VERSION as DJANGO_VERSION
 from django.db import models
-from django.utils.six import text_type
+from django.utils.six import text_type, PY2
 from . import RandomFieldBase
 from random import randint
 from os import urandom
@@ -80,8 +79,14 @@ class NarrowPositiveIntegerField(models.IntegerField, RandomIntegerFieldBase):
     lower_bound = 1000000000
     upper_bound = 2147483647
 
-class IntegerIdentifierValue(text_type):
-    def __new__(cls, value, possibilities, lower_bound, upper_bound):
+class IntegerIdentifierValue(object):
+    db_value = None
+    display_value = None
+    display_str = None
+    
+    def __init__(self, value, possibilities, lower_bound, upper_bound):
+        super(IntegerIdentifierValue, self).__init__()
+        
         # verify types are acceptable
         value = int(value)
         possibilities = int(possibilities)
@@ -104,14 +109,22 @@ class IntegerIdentifierValue(text_type):
         
         display_str = text_type(display_value).zfill(length)
         
-        obj = super(IntegerIdentifierValue, cls).__new__(cls, display_str)
-        obj.db_value = db_value
-        obj.display_value = display_value
-        
-        return obj
+        self.db_value = db_value
+        self.display_value = display_value
+        self.display_str = display_str
     
     def __int__(self):
         return self.db_value
+    
+    if PY2:
+        def __str__(self):
+            return str(self.display_str)
+    
+        def __unicode__(self):
+            return self.display_str
+    else:
+        def __str__(self):
+            return self.display_str
 
 class IntegerIdentifierBase(models.Field):
     try:
@@ -126,7 +139,15 @@ class IntegerIdentifierBase(models.Field):
         return value
     
     def get_prep_value(self, value):
-        return self.to_python(value)
+        if value is not None:
+            value = self.to_python(value).db_value
+        return value
+    
+    def get_db_prep_value(self, *args, **kwargs):
+        value = super(IntegerIdentifierBase, self).get_db_prep_value(*args, **kwargs)
+        if isinstance(value, IntegerIdentifierValue):
+            value = int(value)
+        return value
     
     def from_db_value(self, value, *args):
         return self.to_python(value)
