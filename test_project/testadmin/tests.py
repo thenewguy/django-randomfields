@@ -28,7 +28,11 @@ class AdminTests(TestCase):
     
     def refresh_obj_from_db(self, *args):
         for obj in args:
-            obj.refresh_from_db()
+            try:
+                obj.refresh_from_db()
+            except AttributeError:
+                # Introduced in DJ18
+                pass
     
     def _test_identifier_selected_in_html(self, url, value):
         response = self.client.get(url)
