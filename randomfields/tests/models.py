@@ -57,3 +57,7 @@ class TestIdentifierM2MO2OValue(models.Model):
 class TestIdentifierM2MFKValue(models.Model):
     fk = models.ForeignKey(TestIdentifierValue, related_name='+')
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name='+')
+
+class TestMaskedAttrDetection(models.Model):
+    data_randomfields_available_values = "masked"
+    data = RandomIntegerIdentifierField()

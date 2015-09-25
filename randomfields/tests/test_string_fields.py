@@ -1,9 +1,11 @@
+from django.apps import apps
 from django.db import IntegrityError, transaction
 from django.forms.models import model_to_dict
-from django.test import TestCase
+from django.test import TestCase, SimpleTestCase
 from django.utils.six import text_type
 from randomfields.fields.integer import IntegerIdentifierValue
-from .checks import skipIf, DJANGO_VERSION_17
+from ..apps import RandomFieldConfig
+from .checks import skipIf, skipUnless, DJANGO_VERSION_17
 from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
 
 try:
@@ -15,6 +17,27 @@ except ImportError:
 # NEED TO CHECK AND RAISE ERROR IF MODEL DEFINED WITH AN ATTR NAMED
 # WITH THE VALUE OF Field.available_values_attname AND WRITE TEST
 #
+
+class AppConfigTests(SimpleTestCase):
+    app = "randomfields"
+    
+    def test_is_installed(self):
+        self.assertTrue(apps.is_installed(self.app))
+    
+    def test_get_app_config(self):
+        self.assertIsInstance(apps.get_app_config(self.app), RandomFieldConfig)
+    
+    def test_unsupported_fields(self):
+        config = apps.get_app_config(self.app)
+        
+        if DJANGO_VERSION_17:
+            self.assertTrue(config.unsupported_fields)
+        else:
+            self.assertFalse(config.unsupported_fields)
+    
+    def test_masked_attrs(self):
+        config = apps.get_app_config(self.app)
+        self.assertTrue(config.masked_attrs)
 
 class SaveTests(TestCase):
     def _test_identifier_expected_values(self, model_class, attr):
