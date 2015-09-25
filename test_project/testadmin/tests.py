@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from django.utils.six import text_type
+from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
 from randomfields.tests.models import TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 
 class DatabaseTest(TestCase):
@@ -13,7 +13,8 @@ class DatabaseTest(TestCase):
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.check_password(settings.SUPERUSER_PASSWORD))
 
-class AdminTests(TestCase):
+@skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
+class IdentifierAdminTests(TestCase):
     def setUp(self):
         self.client.login(username=settings.SUPERUSER_USERNAME, password=settings.SUPERUSER_PASSWORD)
     

@@ -3,6 +3,7 @@ from django.forms.models import model_to_dict
 from django.test import TestCase
 from django.utils.six import text_type
 from randomfields.fields.integer import IntegerIdentifierValue
+from .checks import skipIf, DJANGO_VERSION_17
 from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
 
 try:
@@ -45,13 +46,16 @@ class SaveTests(TestCase):
                 data = model_to_dict(obj)
                 text = text_type(value)
                 self.assertEqual(data.get(key, None), value, "Key '{}' did not match integer id '{}' in the following dict: {}".format(key, text, data))
-        
+    
+    @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
     def test_identifier_expected_values_primary_key_by_fieldname(self):
         self._test_identifier_expected_values(TestIdentifierValue, "id")
-        
+    
+    @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
     def test_identifier_expected_values_primary_key_by_pk(self):
         self._test_identifier_expected_values(TestIdentifierValue, "pk")
     
+    @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
     def test_identifier_expected_values_data(self):
         self._test_identifier_expected_values(TestIdentifierData, "data")
             
