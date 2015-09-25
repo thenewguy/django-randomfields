@@ -33,11 +33,7 @@ class SaveTests(TestCase):
             self.assertTrue(model_class.objects.filter(**{attr: db_value}).exists())
             obj2 = model_class.objects.get(**{attr: db_value})
             
-            try:
-                obj1.refresh_from_db()
-            except AttributeError:
-                # Introduced in DJ18
-                pass
+            obj1.full_clean()
             
             for obj in (obj1, obj2):
                 value = getattr(obj, attr)
