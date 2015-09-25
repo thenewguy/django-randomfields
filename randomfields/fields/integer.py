@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.six import text_type, PY2
 from . import RandomFieldBase
 from random import randint
@@ -79,6 +80,7 @@ class NarrowPositiveIntegerField(models.IntegerField, RandomIntegerFieldBase):
     lower_bound = 1000000000
     upper_bound = 2147483647
 
+@python_2_unicode_compatible
 class IntegerIdentifierValue(object):
     db_value = None
     display_value = None
@@ -116,15 +118,8 @@ class IntegerIdentifierValue(object):
     def __int__(self):
         return self.db_value
     
-    if PY2:
-        def __str__(self):
-            return str(self.display_str)
-    
-        def __unicode__(self):
-            return self.display_str
-    else:
-        def __str__(self):
-            return self.display_str
+    def __str__(self):
+        return self.display_str
 
 class IntegerIdentifierBase(models.Field):
     try:
