@@ -1,11 +1,14 @@
 from setuptools import setup, find_packages
 from setuptools.command.test import test as SetuptoolsTestCommand
+from shlex import split
 from sys import version_info
 
 class RunTestsCommand(SetuptoolsTestCommand):
+    user_options = [('only=', 'o', 'Only run the specified tests')]
     def initialize_options(self):
         SetuptoolsTestCommand.initialize_options(self)
         self.test_suite = "override"
+        self.only = ""
 
     def finalize_options(self):
         SetuptoolsTestCommand.finalize_options(self)
@@ -22,8 +25,10 @@ class RunTestsCommand(SetuptoolsTestCommand):
         owd = os.path.abspath(os.getcwd())
         nwd = os.path.abspath(os.path.dirname(__file__))
         os.chdir(nwd)
-        
-        errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test', nwd, os.path.abspath('test_project')])
+        tests = split(self.only)
+        if not tests:
+            tests.extend([nwd, os.path.abspath('test_project')])
+        errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test'] + tests)
         coverage.cmdline.main(['report', '-m'])
         
         os.chdir(owd)
