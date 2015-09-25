@@ -26,6 +26,10 @@ class AdminTests(TestCase):
     def get_admin_change_url(self, obj):
         return reverse(self.get_admin_url(obj, "change"), args=(obj.pk,))
     
+    def refresh_obj_from_db(self, *args):
+        for obj in args:
+            obj.refresh_from_db()
+    
     def _test_identifier_selected_in_html(self, url, value):
         response = self.client.get(url)
         soup = BeautifulSoup(response.content, 'html5lib')
@@ -41,52 +45,61 @@ class AdminTests(TestCase):
     def test_identifier_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierO2OValue.objects.create(id=obj)
+        self.refresh_obj_from_db(obj, rel)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
     def test_identifier_fk_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierFKValue.objects.create(data=obj)
+        self.refresh_obj_from_db(obj, rel)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
     def test_identifier_m2m_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MValue.objects.create()
         rel.data.add(obj)
+        self.refresh_obj_from_db(obj, rel)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
     def test_identifier_all_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierAllValue.objects.create(o2o=obj, fk=obj)
         rel.m2m.add(obj)
+        self.refresh_obj_from_db(obj, rel)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
     def test_identifier_m2m_o2opk_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MO2OPKValue.objects.create(id=obj)
         rel.m2m.add(obj)
+        self.refresh_obj_from_db(obj, rel)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
 
     def test_identifier_m2m_o2oid_html_pk(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MO2OPKValue.objects.create(pk=obj.pk)
         rel.m2m.add(obj)
+        self.refresh_obj_from_db(obj, rel)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
     def test_identifier_m2m_o2oid_html_id(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MO2OPKValue.objects.create(id=obj)
         rel.m2m.add(obj)
+        self.refresh_obj_from_db(obj, rel)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.id)
     
     def test_identifier_m2m_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MO2OValue.objects.create(o2o=obj)
         rel.m2m.add(obj)
+        self.refresh_obj_from_db(obj, rel)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
     
     def test_identifier_m2m_fk_html(self):
         obj = TestIdentifierValue.objects.create()
         rel = TestIdentifierM2MFKValue.objects.create(fk=obj)
         rel.m2m.add(obj)
+        self.refresh_obj_from_db(obj, rel)
         self._test_identifier_selected_in_html(self.get_admin_change_url(rel), obj.pk)
         
