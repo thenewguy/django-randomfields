@@ -42,7 +42,7 @@ class FieldTests(SimpleTestCase):
         self.assertEqual(field.upper_bound, 32767)
     
     def test_integer_formfield_bounds(self):
-        for field_cls in [RandomIntegerField, RandomBigIntegerField, RandomSmallIntegerField]:
+        for field_cls in [RandomIntegerField, RandomBigIntegerField, RandomSmallIntegerField, NarrowPositiveIntegerField]:
             field = field_cls()
             form_field = field.formfield()
             
@@ -109,6 +109,28 @@ class FieldTests(SimpleTestCase):
             (32767, 98303),
         )
         self._test_integer_identifier_conversions(RandomSmallIntegerIdentifierField, value_map)
+    
+    def test_integerfield_identifier_formfield_validation(self):
+        for field_cls in (RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField):
+            field = field_cls()
+            form_field = field.formfield()
+            
+            # identifiers are mapped to value + possibilities, so values range (lowerbound, upperbound)
+            # should raise validation errors
+            with self.assertRaises(ValidationError):
+                form_field.clean(field.lower_bound)
+            with self.assertRaises(ValidationError):
+                form_field.clean(field.upper_bound)
+            for value in [int(field.lower_bound + p * (field.possibilities() - 2)) for p in (.1, .3, .5, .7, .9)]:
+                with self.assertRaises(ValidationError):
+                    form_field.clean(value)
+            
+            # no exceptions
+            possibilities = field.possibilities()
+            form_field.clean(field.lower_bound + possibilities)
+            form_field.clean(field.upper_bound + possibilities)
+            for value in [int(field.lower_bound + p * (field.possibilities() - 2)) for p in (.1, .3, .5, .7, .9)]:
+                form_field.clean(value + possibilities)
     
     def test_integerfield_identifier_zfill_width(self):
         for field_cls in (NarrowPositiveIntegerField, RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField):

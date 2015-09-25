@@ -1,6 +1,8 @@
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
-from django.utils.six import text_type, PY2
+from django.utils.encoding import python_2_unicode_compatible, force_text
+from django.utils.six import text_type, integer_types, string_types
+from itertools import chain
+from functools import total_ordering
 from . import RandomFieldBase
 from random import randint
 from os import urandom
@@ -81,10 +83,14 @@ class NarrowPositiveIntegerField(models.IntegerField, RandomIntegerFieldBase):
     upper_bound = 2147483647
 
 @python_2_unicode_compatible
+@total_ordering
 class IntegerIdentifierValue(object):
     db_value = None
     display_value = None
     display_str = None
+    lower_bound = None
+    upper_bound = None
+    possibilities = None
     
     def __init__(self, value, possibilities, lower_bound, upper_bound):
         super(IntegerIdentifierValue, self).__init__()
@@ -114,12 +120,47 @@ class IntegerIdentifierValue(object):
         self.db_value = db_value
         self.display_value = display_value
         self.display_str = display_str
+        self.lower_bound = lower_bound
+        self.upper_bound = upper_bound
+        self.possibilities = possibilities
     
     def __int__(self):
         return self.db_value
     
     def __str__(self):
         return self.display_str
+
+    def _convert_other_for_comparison(self, other):
+        value = None
+        known_types = tuple(chain(string_types, integer_types, [IntegerIdentifierValue]))
+        if not isinstance(other, known_types):
+            try:
+                other = int(other)
+            except (TypeError, ValueError):
+                try:
+                    other = force_text(other)
+                except (TypeError, ValueError):
+                    pass
+        if isinstance(other, integer_types):
+            other = IntegerIdentifierValue(other, self.possibilities, self.lower_bound, self.upper_bound)
+        if isinstance(other, IntegerIdentifierValue):
+            value = int(self)
+            other = int(other)
+        if isinstance(other, string_types):
+            value = text_type(self)
+            if not isinstance(other, text_type):
+                other = force_text(other)
+        if value is None:
+            raise TypeError("Could not compare against other type '%s'" % type(other))
+        return value, other
+        
+    def __eq__(self, other):
+        value, other = self._convert_other_for_comparison(other)
+        return value == other
+    
+    def __lt__(self, other):
+        value, other = self._convert_other_for_comparison(other)
+        return value < other
 
 class IntegerIdentifierBase(models.Field):
     try:
