@@ -74,10 +74,13 @@ class NarrowPositiveIntegerField(models.IntegerField, RandomIntegerFieldBase):
         This field is a drop in replacement for AutoField primary keys.
         It returns a random integer between 1,000,000,000 and 2,147,483,647.
         These values were chosen specifically so that the string representation
-        would be fixed length without requiring zero padding.  This class is
-        meant to be used until django works more reliably with fields like
-        RandomIntegerIdentifierField which provide a larger range of values
-        but cause quirks with django like https://code.djangoproject.com/ticket/23335
+        would be fixed length without requiring zero padding.
+        
+        This field uses a simpler approach to mimic the functionality of the
+        identifier fields like `RandomBigIntegerIdentifierField`,
+        `RandomIntegerIdentifierField`, and `RandomSmallIntegerIdentifierField`
+        which cannot be reliably implemented under older versions of Django (< 1.8)
+        that do not offer Field.from_db_value() support.
     """
     lower_bound = 1000000000
     upper_bound = 2147483647
@@ -163,12 +166,6 @@ class IntegerIdentifierValue(object):
         return value < other
 
 class IntegerIdentifierBase(models.Field):
-    try:
-        __metaclass__ = models.SubfieldBase
-    except AttributeError:
-        # Django 1.10 removes models.SubfieldBase
-        pass
-        
     def to_python(self, value):
         if value is not None and not isinstance(value, IntegerIdentifierValue):
             value = IntegerIdentifierValue(value, self.possibilities(), self.lower_bound, self.upper_bound)
