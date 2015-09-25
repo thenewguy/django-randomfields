@@ -190,8 +190,8 @@ class IntegerIdentifierBase(models.Field):
     
     def formfield(self, **kwargs):
         defaults = {
-            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities(), self.lower_bound, self.upper_bound),
-            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities(), self.lower_bound, self.upper_bound),
+            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities(), self.lower_bound, self.upper_bound).display_value,
+            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities(), self.lower_bound, self.upper_bound).display_value,
         }
         defaults.update(kwargs)
         return super(IntegerIdentifierBase, self).formfield(**defaults)
