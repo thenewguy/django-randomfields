@@ -5,11 +5,10 @@ from json import dumps
 from .fields.integer import IntegerIdentifierBase, RandomFieldBase
 from .tests.checks import DJANGO_VERSION_17
 
-if DJANGO_VERSION_17:
-    all_prepared_model_classes = []
-    @receiver(class_prepared)
-    def store_model_class(sender, **kwargs):
-        all_prepared_model_classes.append(sender)
+all_prepared_model_classes = []
+@receiver(class_prepared)
+def store_model_class(sender, **kwargs):
+    all_prepared_model_classes.append(sender)
 
 class RandomFieldConfig(AppConfig):
     name = "randomfields"
