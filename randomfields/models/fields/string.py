@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.six.moves import range
-from random import choice, randint
-from .base import RandomFieldBase
+from .base import RandomFieldBase, random
 
 default_valid_chars = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 class RandomCharField(models.CharField, RandomFieldBase):
@@ -25,5 +24,5 @@ class RandomCharField(models.CharField, RandomFieldBase):
         if self.min_length is None:
             length = self.max_length
         else:
-            length = randint(self.min_length, self.max_length)
-        return "".join([choice(self.valid_chars) for _ in range(length)])
+            length = random.randint(self.min_length, self.max_length)
+        return "".join([random.choice(self.valid_chars) for _ in range(length)])

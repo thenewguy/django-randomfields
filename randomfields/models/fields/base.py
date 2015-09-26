@@ -1,7 +1,18 @@
 from django.core import checks
 from django.db import models, IntegrityError, transaction
 from math import log, ceil
+from os import urandom
 import logging
+
+try:
+    urandom(1)
+except NotImplementedError:
+    urandom_available = False
+    import random
+else:
+    urandom_available = True
+    from random import SystemRandom
+    random = SystemRandom()
 
 class RandomFieldBase(models.Field):
     empty_strings_allowed = False

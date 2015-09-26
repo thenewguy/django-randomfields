@@ -1,15 +1,9 @@
 from django.core import checks
 from django.db import models
-from random import randint
-from os import urandom
-from ..base import RandomFieldBase
-try:
-    urandom(1)
-except NotImplementedError:
-    urandom_available = False
-else:
-    urandom_available = True
-    from struct import unpack    
+from ..base import RandomFieldBase, urandom_available, urandom, random
+
+if urandom_available:
+    from struct import unpack
 
 class RandomIntegerFieldBase(RandomFieldBase):
     bytes = None
@@ -40,7 +34,7 @@ class RandomIntegerFieldBase(RandomFieldBase):
         if urandom_available and self.bytes:
             value = unpack(self.unpack_fmt, urandom(self.bytes))[0]
         else:
-            value = randint(self.lower_bound, self.upper_bound)
+            value = random.randint(self.lower_bound, self.upper_bound)
         return value
     
     def formfield(self, **kwargs):
