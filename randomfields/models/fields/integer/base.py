@@ -34,7 +34,7 @@ class RandomIntegerFieldBase(RandomFieldBase):
         elif self.lower_bound is None or self.upper_bound is None:
             raise TypeError("lower_bound and upper_bound must be specified when bytes is not")
         
-        self._possibilities = self.upper_bound - self.lower_bound + 1
+        self.possibilities = self.upper_bound - self.lower_bound + 1
     
     def random(self):
         if urandom_available and self.bytes:
@@ -42,9 +42,6 @@ class RandomIntegerFieldBase(RandomFieldBase):
         else:
             value = randint(self.lower_bound, self.upper_bound)
         return value
-    
-    def possibilities(self):
-        return self._possibilities
     
     def formfield(self, **kwargs):
         defaults = {

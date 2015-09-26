@@ -28,13 +28,12 @@ class RandomFieldBase(models.Field):
             choices = set()
             
             # ensure unique values are available
-            possibilities = self.possibilities()# count of all possibilities
             t = model_cls.objects.count()# count of taken possibilities
-            if t == possibilities:
+            if t == self.possibilities:
                 raise IntegrityError("All possibilities for field '%s' on %r are taken." % (self.attname, model_cls))
             
             # determine how many random values to generate
-            a = float(possibilities)# force float
+            a = float(self.possibilities)# force float
             p = 1 - ((a - t) / a)# probability of collision
             if p:
                 x = log(self.alpha) / log(p)
@@ -46,7 +45,7 @@ class RandomFieldBase(models.Field):
             # warn if over full
             percent_used = t / a
             if self.warn_at_percent < percent_used:
-                remaining_choices = possibilities - t
+                remaining_choices = self.possibilities - t
                 self.logger.warning("%.2f%% of the choices for field '%s' on %r are taken.  There %s remaining." % (
                         percent_used * 100,
                         self.attname,
@@ -57,8 +56,8 @@ class RandomFieldBase(models.Field):
     
             # ensure we do not try to generate more values than possible
             count = 1 + x
-            if possibilities < count:
-                count = possibilities
+            if self.possibilities < count:
+                count = self.possibilities
             
             while len(choices) < count:
                 choices.add(self.random())
@@ -129,11 +128,24 @@ class RandomFieldBase(models.Field):
         """
         raise NotImplementedError("random() must be implemented by subclasses.")
     
+    @property
     def possibilities(self):
         """
-            method returns the number of possibilities that a random value may take as an integer
+            the number of possibilities that a random value may take as an integer
         """
-        raise NotImplementedError("possibilities() must be implemented by subclasses.")
+        if self._possibilities is None:
+            raise NotImplementedError("'possibilities' must be set by subclasses.")
+        return self._possibilities
+    _possibilities = None
+    
+    @possibilities.setter
+    def possibilities(self, value):
+        if self._possibilities is not None:
+            raise NotImplementedError("'possibilities' may only be set once.") 
+        value = int(value)
+        if not 0 < value:
+            raise ValueError("must be greater than 0")
+        self._possibilities = value
     
     def check(self, **kwargs):
         errors = super(RandomFieldBase, self).check(**kwargs)

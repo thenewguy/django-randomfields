@@ -142,7 +142,7 @@ class SaveTests(TestCase):
         self.assertEqual(obj1._meta.get_field("data").valid_chars, "ab")
         self.assertEqual(obj1._meta.get_field("data").max_length, 2)
         self.assertEqual(obj1._meta.get_field("data").min_length, 1)
-        self.assertEqual(6, obj1._meta.get_field("data").possibilities())
+        self.assertEqual(6, obj1._meta.get_field("data").possibilities)
         self.assertEqual(0, TestMinLengthPossibilities.objects.count())
         
         warn_at = 0.55
@@ -176,7 +176,7 @@ class SaveTests(TestCase):
                 bb
                 b
         """
-        self.assertEqual(6, obj1._meta.get_field("data").possibilities())
+        self.assertEqual(6, obj1._meta.get_field("data").possibilities)
         
         # ensure all possibilities are saved
         while TestMinLengthPossibilities.objects.count() < 6:
@@ -205,7 +205,7 @@ class SaveTests(TestCase):
                 ba
                 bb
         """
-        self.assertEqual(4, obj1._meta.get_field("data").possibilities())
+        self.assertEqual(4, obj1._meta.get_field("data").possibilities)
         
         # ensure all possibilities are saved
         while TestFixLengthPossibilities.objects.count() < 4:

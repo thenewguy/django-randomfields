@@ -90,7 +90,7 @@ class IntegerIdentifierValue(object):
 class IntegerIdentifierBase(models.Field):
     def to_python(self, value):
         if value is not None and not isinstance(value, IntegerIdentifierValue):
-            value = IntegerIdentifierValue(value, self.possibilities(), self.lower_bound, self.upper_bound)
+            value = IntegerIdentifierValue(value, self.possibilities, self.lower_bound, self.upper_bound)
         return value
     
     def get_prep_value(self, value):
@@ -109,8 +109,8 @@ class IntegerIdentifierBase(models.Field):
     
     def formfield(self, **kwargs):
         defaults = {
-            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities(), self.lower_bound, self.upper_bound).display_value,
-            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities(), self.lower_bound, self.upper_bound).display_value,
+            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
+            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
         }
         defaults.update(kwargs)
         return super(IntegerIdentifierBase, self).formfield(**defaults)

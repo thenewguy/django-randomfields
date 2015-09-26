@@ -49,7 +49,7 @@ class FieldTests(SimpleTestCase):
             # no exceptions
             form_field.clean(field.lower_bound)
             form_field.clean(field.upper_bound)
-            for value in [int(field.lower_bound + p * (field.possibilities() - 2)) for p in (.1, .3, .5, .7, .9)]:
+            for value in [int(field.lower_bound + p * (field.possibilities - 2)) for p in (.1, .3, .5, .7, .9)]:
                 form_field.clean(value)
             
             with self.assertRaises(ValidationError):
@@ -121,16 +121,15 @@ class FieldTests(SimpleTestCase):
                 form_field.clean(field.lower_bound)
             with self.assertRaises(ValidationError):
                 form_field.clean(field.upper_bound)
-            for value in [int(field.lower_bound + p * (field.possibilities() - 2)) for p in (.1, .3, .5, .7, .9)]:
+            for value in [int(field.lower_bound + p * (field.possibilities - 2)) for p in (.1, .3, .5, .7, .9)]:
                 with self.assertRaises(ValidationError):
                     form_field.clean(value)
             
             # no exceptions
-            possibilities = field.possibilities()
-            form_field.clean(field.lower_bound + possibilities)
-            form_field.clean(field.upper_bound + possibilities)
-            for value in [int(field.lower_bound + p * (field.possibilities() - 2)) for p in (.1, .3, .5, .7, .9)]:
-                form_field.clean(value + possibilities)
+            form_field.clean(field.lower_bound + field.possibilities)
+            form_field.clean(field.upper_bound + field.possibilities)
+            for value in [int(field.lower_bound + p * (field.possibilities - 2)) for p in (.1, .3, .5, .7, .9)]:
+                form_field.clean(value + field.possibilities)
     
     def test_integerfield_identifier_zfill_width(self):
         for field_cls in (NarrowPositiveIntegerField, RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField):
