@@ -140,7 +140,7 @@ class SaveTests(TestCase):
         self.assertEqual(val1, obj1.unique_field)
         self.assertFalse(hasattr(obj1, field1.available_values_attname))
     
-    @mock.patch('randomfields.fields.logger')
+    @mock.patch('randomfields.fields.base.logger')
     def test_warn_at_percent(self, mocked_logger):
         obj1 = TestMinLengthPossibilities()
         self.assertEqual(obj1._meta.get_field("data").valid_chars, "ab")
