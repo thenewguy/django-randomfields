@@ -1,4 +1,8 @@
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible, force_text
+from django.utils.six import text_type, integer_types, string_types
+from itertools import chain
+from functools import total_ordering
 from . import RandomFieldBase
 from random import randint
 from os import urandom
@@ -70,16 +74,30 @@ class NarrowPositiveIntegerField(models.IntegerField, RandomIntegerFieldBase):
         This field is a drop in replacement for AutoField primary keys.
         It returns a random integer between 1,000,000,000 and 2,147,483,647.
         These values were chosen specifically so that the string representation
-        would be fixed length without requiring zero padding.  This class is
-        meant to be used until django works more reliably with fields like
-        RandomIntegerIdentifierField which provide a larger range of values
-        but cause quirks with django like https://code.djangoproject.com/ticket/23335
+        would be fixed length without requiring zero padding.
+        
+        This field uses a simpler approach to mimic the functionality of the
+        identifier fields like `RandomBigIntegerIdentifierField`,
+        `RandomIntegerIdentifierField`, and `RandomSmallIntegerIdentifierField`
+        which cannot be reliably implemented under older versions of Django (< 1.8)
+        that do not offer Field.from_db_value() support.
     """
     lower_bound = 1000000000
     upper_bound = 2147483647
 
-class IntegerIdentifierValue(str):
-    def __new__(cls, value, possibilities, lower_bound, upper_bound):
+@python_2_unicode_compatible
+@total_ordering
+class IntegerIdentifierValue(object):
+    db_value = None
+    display_value = None
+    display_str = None
+    lower_bound = None
+    upper_bound = None
+    possibilities = None
+    
+    def __init__(self, value, possibilities, lower_bound, upper_bound):
+        super(IntegerIdentifierValue, self).__init__()
+        
         # verify types are acceptable
         value = int(value)
         possibilities = int(possibilities)
@@ -98,46 +116,79 @@ class IntegerIdentifierValue(str):
             display_value = value
             db_value = value - possibilities
         
-        length = len(str(possibilities + upper_bound))
+        length = len(text_type(possibilities + upper_bound))
         
-        display_str = str(display_value).zfill(length)
+        display_str = text_type(display_value).zfill(length)
         
-        obj = super(IntegerIdentifierValue, cls).__new__(cls, display_str)
-        obj.db_value = db_value
-        obj.display_value = display_value
-        
-        return obj
+        self.db_value = db_value
+        self.display_value = display_value
+        self.display_str = display_str
+        self.lower_bound = lower_bound
+        self.upper_bound = upper_bound
+        self.possibilities = possibilities
     
     def __int__(self):
-        return self.display_value
+        return self.db_value
+    
+    def __str__(self):
+        return self.display_str
+
+    def _convert_other_for_comparison(self, other):
+        value = None
+        known_types = tuple(chain(string_types, integer_types, [IntegerIdentifierValue]))
+        if not isinstance(other, known_types):
+            try:
+                other = int(other)
+            except (TypeError, ValueError):
+                try:
+                    other = force_text(other)
+                except (TypeError, ValueError):
+                    pass
+        if isinstance(other, integer_types):
+            other = IntegerIdentifierValue(other, self.possibilities, self.lower_bound, self.upper_bound)
+        if isinstance(other, IntegerIdentifierValue):
+            value = int(self)
+            other = int(other)
+        if isinstance(other, string_types):
+            value = text_type(self)
+            if not isinstance(other, text_type):
+                other = force_text(other)
+        if value is None:
+            raise TypeError("Could not compare against other type '%s'" % type(other))
+        return value, other
+        
+    def __eq__(self, other):
+        value, other = self._convert_other_for_comparison(other)
+        return value == other
+    
+    def __lt__(self, other):
+        value, other = self._convert_other_for_comparison(other)
+        return value < other
 
 class IntegerIdentifierBase(models.Field):
-    __metaclass__ = models.SubfieldBase
-        
     def to_python(self, value):
-        """
-            Deal gracefully with any of the following arguments:
-                - An instance of the correct type (e.g., Hand in our ongoing example).
-                - A string (e.g., from a deserializer).
-                - Whatever the database returns for the column type you're using.
-        """
         if value is not None and not isinstance(value, IntegerIdentifierValue):
-            value = super(IntegerIdentifierBase, self).to_python(value)
             value = IntegerIdentifierValue(value, self.possibilities(), self.lower_bound, self.upper_bound)
-        
         return value
     
     def get_prep_value(self, value):
         if value is not None:
-            if not isinstance(value, IntegerIdentifierValue):
-                value = self.to_python(value)
-            value = value.db_value
+            value = self.to_python(value).db_value
         return value
+    
+    def get_db_prep_value(self, *args, **kwargs):
+        value = super(IntegerIdentifierBase, self).get_db_prep_value(*args, **kwargs)
+        if isinstance(value, IntegerIdentifierValue):
+            value = int(value)
+        return value
+    
+    def from_db_value(self, value, *args):
+        return self.to_python(value)
     
     def formfield(self, **kwargs):
         defaults = {
-            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities(), self.lower_bound, self.upper_bound),
-            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities(), self.lower_bound, self.upper_bound),
+            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities(), self.lower_bound, self.upper_bound).display_value,
+            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities(), self.lower_bound, self.upper_bound).display_value,
         }
         defaults.update(kwargs)
         return super(IntegerIdentifierBase, self).formfield(**defaults)
