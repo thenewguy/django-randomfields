@@ -1,6 +1,6 @@
 from django.db import models
-from randomfields.fields.string import RandomCharField
-from randomfields.fields.integer import RandomIntegerIdentifierField
+from randomfields.models.fields.string import RandomCharField
+from randomfields.models.fields.integer import RandomIntegerIdentifierField
 from uuid import uuid4
 
 def unique_related_name():

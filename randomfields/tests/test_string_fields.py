@@ -3,7 +3,7 @@ from django.db import IntegrityError, transaction
 from django.forms.models import model_to_dict
 from django.test import TestCase, SimpleTestCase
 from django.utils.six import text_type
-from randomfields.fields.integer import IntegerIdentifierValue
+from randomfields.models.fields.integer import IntegerIdentifierValue
 from ..apps import RandomFieldConfig
 from .checks import skipIf, DJANGO_VERSION_17
 from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
@@ -140,7 +140,7 @@ class SaveTests(TestCase):
         self.assertEqual(val1, obj1.unique_field)
         self.assertFalse(hasattr(obj1, field1.available_values_attname))
     
-    @mock.patch('randomfields.fields.base.logger')
+    @mock.patch('randomfields.models.fields.RandomFieldBase.logger')
     def test_warn_at_percent(self, mocked_logger):
         obj1 = TestMinLengthPossibilities()
         self.assertEqual(obj1._meta.get_field("data").valid_chars, "ab")

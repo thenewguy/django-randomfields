@@ -2,7 +2,7 @@ from django.apps import AppConfig
 from django.db.models.signals import class_prepared
 from django.dispatch import receiver
 from json import dumps
-from .fields.integer import IntegerIdentifierBase, RandomFieldBase
+from .models.fields.integer import IntegerIdentifierBase, RandomFieldBase
 from .tests.checks import DJANGO_VERSION_17
 
 all_prepared_model_classes = []
