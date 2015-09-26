@@ -2,8 +2,8 @@ language: python
 cache: pip
 env:
   global:
-    - PIP_FIND_LINKS=file://$CASHER_DIR
-    - PIP_WHEEL_DIR=$CASHER_DIR
+    - PIP_FIND_LINKS=file://$HOME/.casher
+    - PIP_WHEEL_DIR=$HOME/.casher
   matrix:
     - TOXENV=py27-django-17
     - TOXENV=py27-django-18
