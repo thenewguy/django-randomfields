@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
-from randomfields.tests.models import TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
+from randomfields.tests.models import TestNPIFieldChecks, TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 from randomfields.tests.test_string_fields import AppConfigTests
 
 class DatabaseTest(TestCase):
@@ -19,20 +19,22 @@ class AppTestConfigTests(AppConfigTests):
     def test_tests_are_installed(self):
         self.assertTrue(apps.is_installed("%s.tests" % self.app))
     
-    def test_unsupported_fields(self):
-        errors = TestIdentifierValue().check()
-        key = "randomfields.models.fields.integer.identifier.IntegerIdentifierBase.Unsupported"
+    def _test_system_check(self, obj, key, expected=True):
+        errors = obj.check()
         ids = [error.id for error in errors]
-        
-        if DJANGO_VERSION_17:
+        if expected:
             self.assertIn(key, ids)
         else:
             self.assertNotIn(key, ids)
+    
+    def test_unsupported_fields(self):
+        self._test_system_check(TestIdentifierValue, "randomfields.models.fields.integer.identifier.IntegerIdentifierBase.Unsupported", DJANGO_VERSION_17)
 
     def test_masked_attrs(self):
-        errors = TestMaskedAttrDetection().check()
-        ids = [error.id for error in errors]
-        self.assertIn("randomfields.models.fields.base.RandomFieldBase.MaskedAttr", ids)
+        self._test_system_check(TestMaskedAttrDetection, "randomfields.models.fields.base.RandomFieldBase.MaskedAttr")
+    
+    def test_narrow_positive_integer_field_depreciated(self):
+        self._test_system_check(TestNPIFieldChecks, "randomfields.models.fields.integer.base.NarrowPositiveIntegerField.Depreciated")
 
 @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
 class IdentifierAdminTests(TestCase):

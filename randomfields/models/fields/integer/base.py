@@ -86,6 +86,6 @@ class NarrowPositiveIntegerField(RandomNarrowIntegerField):
             'NarrowPositiveIntegerField has been deprecated.',
             hint='Use RandomNarrowIntegerField instead.',
             obj=self,
-            id='%s.%s.E001' % (__name__, self.__class__.__name__),
+            id='%s.%s.Depreciated' % (__name__, self.__class__.__name__),
         ))
         return errors
