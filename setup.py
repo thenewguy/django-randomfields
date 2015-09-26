@@ -21,6 +21,9 @@ class RunTestsCommand(SetuptoolsTestCommand):
     def run_tests(self):
         import coverage.cmdline
         import os
+        import subprocess
+        import sys
+        import time
         
         owd = os.path.abspath(os.getcwd())
         nwd = os.path.abspath(os.path.dirname(__file__))
@@ -31,11 +34,25 @@ class RunTestsCommand(SetuptoolsTestCommand):
         errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test'] + tests)
         coverage.cmdline.main(['report', '-m'])
         
+        if None not in [os.getenv("TRAVIS", None), os.getenv("TRAVIS_JOB_ID", None), os.getenv("TRAVIS_BRANCH", None)]:
+            env = os.environ.copy()
+            env["PYTHONPATH"] = os.pathsep.join(sys.path)
+            cmd = ["coveralls", "--verbose"]
+            coveralls_retry = 5
+            while subprocess.call(cmd, env=env) and coveralls_retry:
+                coveralls_retry -= 1
+                if coveralls_retry:
+                    seconds = 10
+                    print("coveralls was unsuccessful. sleeping for %s seconds before retrying." % seconds)
+                    time.sleep(seconds)
+                else:
+                    print("coveralls failed.")
+        
         os.chdir(owd)
         
         raise SystemExit(errno)
 
-tests_require = ['coverage', 'beautifulsoup4', 'html5lib']
+tests_require = ['coverage', 'beautifulsoup4', 'html5lib', 'coveralls']
 if version_info < (3, 3):
     tests_require = tests_require + ['mock', 'pbr<1.7.0']
 
