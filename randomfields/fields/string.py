@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.six.moves import range
 from random import choice, randint
-from . import RandomFieldBase
+from .base import RandomFieldBase
 
 default_valid_chars = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 class RandomCharField(models.CharField, RandomFieldBase):
