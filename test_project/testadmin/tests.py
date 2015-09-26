@@ -1,10 +1,13 @@
 from bs4 import BeautifulSoup
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from randomfields.apps import RandomFieldTestConfig
 from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
 from randomfields.tests.models import TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
+from randomfields.tests.test_string_fields import AppConfigTests
 
 class DatabaseTest(TestCase):
     def test_superuser_exists(self):
@@ -12,6 +15,22 @@ class DatabaseTest(TestCase):
         user = User.objects.get(username=settings.SUPERUSER_USERNAME)
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.check_password(settings.SUPERUSER_PASSWORD))
+
+class AppTestConfigTests(AppConfigTests):
+    def test_is_test_app_config(self):
+        self.assertIsInstance(apps.get_app_config(self.app), RandomFieldTestConfig)
+    
+    def test_unsupported_fields(self):
+        config = apps.get_app_config(self.app)
+        
+        if DJANGO_VERSION_17:
+            self.assertTrue(config.unsupported_fields)
+        else:
+            self.assertFalse(config.unsupported_fields)
+    
+    def test_masked_attrs(self):
+        config = apps.get_app_config(self.app)
+        self.assertTrue(config.masked_attrs)
 
 @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
 class IdentifierAdminTests(TestCase):

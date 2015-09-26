@@ -19,20 +19,8 @@ class AppConfigTests(SimpleTestCase):
     def test_is_installed(self):
         self.assertTrue(apps.is_installed(self.app))
     
-    def test_get_app_config(self):
+    def test_is_app_config(self):
         self.assertIsInstance(apps.get_app_config(self.app), RandomFieldConfig)
-    
-    def test_unsupported_fields(self):
-        config = apps.get_app_config(self.app)
-        
-        if DJANGO_VERSION_17:
-            self.assertTrue(config.unsupported_fields)
-        else:
-            self.assertFalse(config.unsupported_fields)
-    
-    def test_masked_attrs(self):
-        config = apps.get_app_config(self.app)
-        self.assertTrue(config.masked_attrs)
 
 class SaveTests(TestCase):
     def _test_identifier_expected_values(self, model_class, attr):
