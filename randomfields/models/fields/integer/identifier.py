@@ -1,8 +1,10 @@
+from django.core import checks
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, force_text
 from django.utils.six import text_type, integer_types, string_types
 from itertools import chain
 from functools import total_ordering
+from ....tests.checks import DJANGO_VERSION_LT_18
 from .base import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField
 
 @python_2_unicode_compatible
@@ -112,6 +114,17 @@ class IntegerIdentifierBase(models.Field):
         }
         defaults.update(kwargs)
         return super(IntegerIdentifierBase, self).formfield(**defaults)
+    
+    def check(self, **kwargs):
+        errors = super(IntegerIdentifierBase, self).check(**kwargs)
+        if DJANGO_VERSION_LT_18:
+            errors.append(checks.Critical(
+                'IntegerIdentifier fields are not supported on Django versions less than 1.8.',
+                hint='Use RandomNarrowIntegerField instead.',
+                obj=self,
+                id='%s.IntegerIdentifierBase.E001' % __name__,
+            ))
+        return errors
 
 class RandomBigIntegerIdentifierField(IntegerIdentifierBase, RandomBigIntegerField):
     pass
