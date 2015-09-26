@@ -5,18 +5,13 @@ from django.test import TestCase, SimpleTestCase
 from django.utils.six import text_type
 from randomfields.fields.integer import IntegerIdentifierValue
 from ..apps import RandomFieldConfig
-from .checks import skipIf, skipUnless, DJANGO_VERSION_17
+from .checks import skipIf, DJANGO_VERSION_17
 from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
 
 try:
     from unittest import mock
 except ImportError:
     import mock
-
-#
-# NEED TO CHECK AND RAISE ERROR IF MODEL DEFINED WITH AN ATTR NAMED
-# WITH THE VALUE OF Field.available_values_attname AND WRITE TEST
-#
 
 class AppConfigTests(SimpleTestCase):
     app = "randomfields"
