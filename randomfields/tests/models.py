@@ -59,8 +59,8 @@ class TestIdentifierM2MFKValue(models.Model):
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name='+')
 
 class TestMaskedAttrDetection(models.Model):
-    data_randomfields_available_values = "masked"
+    _randomfields_available_values_for_data = "masked"
     data = RandomIntegerIdentifierField()
 
-class TestNarrowPositiveIntegerFieldChecks(models.Model):
+class TestNPIFieldChecks(models.Model):
     data = NarrowPositiveIntegerField()

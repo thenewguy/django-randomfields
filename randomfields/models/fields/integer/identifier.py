@@ -122,7 +122,7 @@ class IntegerIdentifierBase(models.Field):
                 'IntegerIdentifier fields are not supported on Django versions less than 1.8.',
                 hint='Use RandomNarrowIntegerField instead.',
                 obj=self,
-                id='%s.IntegerIdentifierBase.E001' % __name__,
+                id='%s.IntegerIdentifierBase.Unsupported' % __name__,
             ))
         return errors
 

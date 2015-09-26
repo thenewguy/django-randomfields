@@ -1,3 +1,4 @@
+from django.core import checks
 from django.db import models, IntegrityError, transaction
 from math import log, ceil
 import logging
@@ -76,7 +77,7 @@ class RandomFieldBase(models.Field):
     
     @property
     def available_values_attname(self):
-        return "%s_randomfields_available_values" % self.attname
+        return "_randomfields_available_values_for_%s" % self.attname
     
     def persist_available_values(self, obj, available_values):
         setattr(obj, self.available_values_attname, available_values)
@@ -133,3 +134,15 @@ class RandomFieldBase(models.Field):
             method returns the number of possibilities that a random value may take as an integer
         """
         raise NotImplementedError("possibilities() must be implemented by subclasses.")
+    
+    def check(self, **kwargs):
+        errors = super(RandomFieldBase, self).check(**kwargs)
+        instance = self.model()
+        if hasattr(instance, self.available_values_attname):
+            errors.append(checks.Critical(
+                'RandomFieldBase uses the attribute "%s".  The model must not have this attribute.' % self.available_values_attname,
+                obj=self,
+                id='%s.RandomFieldBase.MaskedAttr' % __name__,
+            ))
+        
+        return errors

@@ -40,7 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'randomfields.apps.RandomFieldTestConfig',
+    'randomfields',
     'randomfields.tests',
     'testadmin',
 )
@@ -110,3 +110,8 @@ STATIC_URL = '/static/'
 SUPERUSER_USERNAME = "admin"
 SUPERUSER_EMAIL = "admin@example.com"
 SUPERUSER_PASSWORD = "admin"
+
+SILENCED_SYSTEM_CHECKS = [
+    "randomfields.models.fields.integer.identifier.IntegerIdentifierBase.Unsupported",
+    "randomfields.models.fields.base.RandomFieldBase.MaskedAttr",
+]

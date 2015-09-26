@@ -16,11 +16,8 @@ except ImportError:
 class AppConfigTests(SimpleTestCase):
     app = "randomfields"
     
-    def test_is_installed(self):
+    def test_app_is_installed(self):
         self.assertTrue(apps.is_installed(self.app))
-    
-    def test_is_app_config(self):
-        self.assertIsInstance(apps.get_app_config(self.app), RandomFieldConfig)
 
 class SaveTests(TestCase):
     def _test_identifier_expected_values(self, model_class, attr):

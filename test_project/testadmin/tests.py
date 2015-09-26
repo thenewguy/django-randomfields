@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from randomfields.apps import RandomFieldTestConfig
 from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
-from randomfields.tests.models import TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
+from randomfields.tests.models import TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 from randomfields.tests.test_string_fields import AppConfigTests
 
 class DatabaseTest(TestCase):
@@ -17,20 +17,23 @@ class DatabaseTest(TestCase):
         self.assertTrue(user.check_password(settings.SUPERUSER_PASSWORD))
 
 class AppTestConfigTests(AppConfigTests):
-    def test_is_test_app_config(self):
-        self.assertIsInstance(apps.get_app_config(self.app), RandomFieldTestConfig)
+    def test_tests_are_installed(self):
+        self.assertTrue(apps.is_installed("%s.tests" % self.app))
     
     def test_unsupported_fields(self):
-        config = apps.get_app_config(self.app)
+        errors = TestIdentifierValue().check()
+        key = "randomfields.models.fields.integer.identifier.IntegerIdentifierBase.Unsupported"
+        ids = [error.id for error in errors]
         
         if DJANGO_VERSION_17:
-            self.assertTrue(config.unsupported_fields)
+            self.assertIn(key, ids)
         else:
-            self.assertFalse(config.unsupported_fields)
-    
+            self.assertNotIn(key, ids)
+
     def test_masked_attrs(self):
-        config = apps.get_app_config(self.app)
-        self.assertTrue(config.masked_attrs)
+        errors = TestMaskedAttrDetection().check()
+        ids = [error.id for error in errors]
+        self.assertIn("randomfields.models.fields.base.RandomFieldBase.MaskedAttr", ids)
 
 @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
 class IdentifierAdminTests(TestCase):
