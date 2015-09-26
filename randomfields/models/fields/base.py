@@ -167,5 +167,10 @@ class RandomFieldBase(models.Field):
                 obj=self,
                 id='%s.RandomFieldBase.MaskedAttr' % __name__,
             ))
-        
+        if not urandom_available:
+            errors.append(checks.Warning(
+                '''Cryptographically secure pseudo-random number generator "os.urandom" is not available. Using Python's insecure PRNG as a fallback.''',
+                obj=self,
+                id='%s.RandomFieldBase.InsecurePRNG' % __name__,
+            ))
         return errors
