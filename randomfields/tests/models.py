@@ -1,6 +1,6 @@
 from django.db import models
 from randomfields.models.fields.string import RandomCharField
-from randomfields.models.fields.integer import RandomIntegerIdentifierField
+from randomfields.models.fields.integer import NarrowPositiveIntegerField, RandomIntegerIdentifierField
 from uuid import uuid4
 
 def unique_related_name():
@@ -61,3 +61,6 @@ class TestIdentifierM2MFKValue(models.Model):
 class TestMaskedAttrDetection(models.Model):
     data_randomfields_available_values = "masked"
     data = RandomIntegerIdentifierField()
+
+class TestNarrowPositiveIntegerFieldChecks(models.Model):
+    data = NarrowPositiveIntegerField()

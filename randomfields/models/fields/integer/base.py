@@ -1,3 +1,4 @@
+from django.core import checks
 from django.db import models
 from random import randint
 from os import urandom
@@ -65,7 +66,7 @@ class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
     bytes = 2
     unpack_fmt = "=h"
 
-class NarrowPositiveIntegerField(models.IntegerField, RandomIntegerFieldBase):
+class RandomNarrowIntegerField(models.IntegerField, RandomIntegerFieldBase):
     """
         This field is a drop in replacement for AutoField primary keys.
         It returns a random integer between 1,000,000,000 and 2,147,483,647.
@@ -76,7 +77,18 @@ class NarrowPositiveIntegerField(models.IntegerField, RandomIntegerFieldBase):
         identifier fields like `RandomBigIntegerIdentifierField`,
         `RandomIntegerIdentifierField`, and `RandomSmallIntegerIdentifierField`
         which cannot be reliably implemented under older versions of Django (< 1.8)
-        that do not offer Field.from_db_value() support.
+        due to lack of Field.from_db_value() support.
     """
     lower_bound = 1000000000
     upper_bound = 2147483647
+
+class NarrowPositiveIntegerField(RandomNarrowIntegerField):
+    def check(self, **kwargs):
+        errors = super(NarrowPositiveIntegerField, self).check(**kwargs)
+        errors.append(checks.Warning(
+            'NarrowPositiveIntegerField has been deprecated.',
+            hint='Use RandomNarrowIntegerField instead.',
+            obj=self,
+            id='%s.%s.E001' % (__name__, self.__class__.__name__),
+        ))
+        return errors
