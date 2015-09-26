@@ -37,7 +37,7 @@ class RunTestsCommand(SetuptoolsTestCommand):
         if None not in [os.getenv("TRAVIS", None), os.getenv("TRAVIS_JOB_ID", None), os.getenv("TRAVIS_BRANCH", None)]:
             env = os.environ.copy()
             env["PYTHONPATH"] = os.pathsep.join(sys.path)
-            cmd = ["coveralls", "--verbose"]
+            cmd = ["coveralls"]
             coveralls_retry = 5
             while subprocess.call(cmd, env=env) and coveralls_retry:
                 coveralls_retry -= 1
