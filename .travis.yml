@@ -2,8 +2,8 @@ language: python
 cache: pip
 env:
   global:
-    - PIP_FIND_LINKS=file:///home/travis/.casher/
-    - PIP_WHEEL_DIR=/home/travis/.casher/
+    - PIP_FIND_LINKS=file:///home/travis/.casher/pip
+    - PIP_WHEEL_DIR=/home/travis/.casher/pip
   matrix:
     - TOXENV=py27-django-17
     - TOXENV=py27-django-18
@@ -29,3 +29,5 @@ install:
 script:
   - tox
   - ls -la /home/travis/.casher/
+  - ls -la /home/travis/.casher/bin
+  - ls -la /home/travis/.casher/pip
