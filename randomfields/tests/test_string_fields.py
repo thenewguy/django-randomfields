@@ -4,13 +4,9 @@ from django.forms.models import model_to_dict
 from django.test import TestCase, SimpleTestCase
 from django.utils.six import text_type
 from randomfields.models.fields.integer import IntegerIdentifierValue
+from . import mock
 from .checks import skipIf, DJANGO_VERSION_17
 from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 class AppConfigTests(SimpleTestCase):
     app = "randomfields"
