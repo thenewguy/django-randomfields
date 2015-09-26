@@ -4,6 +4,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from randomfields.models.fields.base import RandomFieldBase
+from randomfields.tests import mock
 from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
 from randomfields.tests.models import TestNPIFieldChecks, TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 from randomfields.tests.test_string_fields import AppConfigTests
@@ -35,6 +37,14 @@ class AppTestConfigTests(AppConfigTests):
     
     def test_narrow_positive_integer_field_depreciated(self):
         self._test_system_check(TestNPIFieldChecks, "randomfields.models.fields.integer.base.NarrowPositiveIntegerField.Depreciated")
+    
+    @mock.patch('randomfields.models.fields.base.RandomFieldBase.urandom_available', new=False)
+    def test_insecure_prng_warning(self):
+        field = RandomFieldBase(name="foo")
+        field.attname = "bar"
+        field.model = TestNPIFieldChecks
+        self.assertFalse(field.urandom_available)
+        self._test_system_check(field, "randomfields.models.fields.base.RandomFieldBase.InsecurePRNG")
 
 @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
 class IdentifierAdminTests(TestCase):
