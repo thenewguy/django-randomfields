@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from randomfields.apps import RandomFieldTestConfig
 from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
 from randomfields.tests.models import TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 from randomfields.tests.test_string_fields import AppConfigTests
