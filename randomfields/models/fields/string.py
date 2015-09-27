@@ -49,7 +49,7 @@ class RandomStringFieldBase(RandomFieldBase):
             'min_length': self.min_length,
         }
         defaults.update(kwargs)
-        return super(RandomStringFieldBase, self).formfield(**kwargs)
+        return super(RandomStringFieldBase, self).formfield(**defaults)
 
 class RandomCharField(RandomStringFieldBase, models.CharField):
     def check(self, **kwargs):
