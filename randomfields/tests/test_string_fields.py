@@ -257,18 +257,36 @@ class SaveTests(TestCase):
         obj2.save()
         self.assertEqual(obj2.unique_rand_field, val2)
     
-    def test_string_formfield_validation(self):
+    def test_string_length_validation(self):
         for field_cls in (RandomCharField, RandomTextField):
             field = field_cls(min_length=10, max_length=10)
             form_field = field.formfield()
-
-            # no exceptions
-            form_field.clean(field.random())
             
+            valid_value = field.random()
+            long_value = valid_value + text_type("a")
+            short_value = valid_value[1:]
+            
+            #
+            # form field validation
+            #
             with self.assertRaises(ValidationError):
-                form_field.clean(field.random() + text_type("a"))
+                form_field.clean(long_value)
             with self.assertRaises(ValidationError):
-                form_field.clean(field.random()[1:])
+                form_field.clean(short_value)
+            
+            # no exceptions
+            form_field.clean(valid_value)
+            
+            #
+            # model field validation
+            #
+            with self.assertRaises(ValidationError):
+                field.run_validators(long_value)
+            
+            # no exceptions -- validated in form layer so db values
+            # do not become invalid as requirements shift
+            field.run_validators(valid_value)
+            field.run_validators(short_value)
     
     def _test_string_field_kwargs(self, exeception_class, kwargs):
         for field_cls in (RandomCharField, RandomTextField):
