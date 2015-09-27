@@ -4,7 +4,7 @@ from django.utils.six import text_type
 from django.utils.six.moves import range
 from .base import RandomFieldBase, random
 
-default_valid_chars = text_type("0123456789ABCDEFGHJKMNPQRSTVWXYZ")
+default_valid_chars = text_type("23456789BCDFGHJKMNPQRSTVWXZ")
 class RandomStringFieldBase(RandomFieldBase):
     def __init__(self, *args, **kwargs):
         self.valid_chars = text_type(kwargs.pop("valid_chars", default_valid_chars))
