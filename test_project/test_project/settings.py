@@ -116,4 +116,5 @@ SILENCED_SYSTEM_CHECKS = [
     "randomfields.models.fields.base.RandomFieldBase.MaskedAttr",
     "randomfields.models.fields.integer.base.NarrowPositiveIntegerField.Depreciated",
     "randomfields.models.fields.base.RandomFieldBase.InsecurePRNG",
+    "randomfields.models.fields.string.RandomCharField.MaxLengthGT255",
 ]

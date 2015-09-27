@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from randomfields.models.fields.base import RandomFieldBase
+from randomfields.models.fields import RandomCharField
 from randomfields.tests import mock
 from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
 from randomfields.tests.models import TestNPIFieldChecks, TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
@@ -45,6 +46,15 @@ class AppTestConfigTests(AppConfigTests):
         field.model = TestNPIFieldChecks
         self.assertFalse(field.urandom_available)
         self._test_system_check(field, "randomfields.models.fields.base.RandomFieldBase.InsecurePRNG")
+    
+    def test_charfield_max_length_warning(self):
+        field = RandomCharField(name="foo", max_length=256)
+        field.attname = "bar"
+        field.model = TestNPIFieldChecks
+        self._test_system_check(field, "randomfields.models.fields.string.RandomCharField.MaxLengthGT255")
+        
+        field.max_length = 255
+        self._test_system_check(field, "randomfields.models.fields.string.RandomCharField.MaxLengthGT255", False)
 
 @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
 class IdentifierAdminTests(TestCase):
