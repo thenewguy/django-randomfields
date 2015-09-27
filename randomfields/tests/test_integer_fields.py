@@ -1,11 +1,22 @@
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 from django.utils.six.moves import range
-from randomfields.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
+from randomfields.models.fields import RandomFieldBase
+from randomfields.models.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \
                                         NarrowPositiveIntegerField
 
 class FieldTests(SimpleTestCase):
+    def test_zero_possibilities(self):
+        field = RandomFieldBase()
+        with self.assertRaises(NotImplementedError):
+            field.possibilities
+        with self.assertRaises(ValueError):
+            field.possibilities = 0
+        field.possibilities = 7
+        with self.assertRaises(NotImplementedError):
+            field.possibilities = 12
+                
     def test_invalid_rifb_attrs(self):
         class InvalidAttrs1(RandomIntegerFieldBase):
             bytes = None
@@ -49,7 +60,7 @@ class FieldTests(SimpleTestCase):
             # no exceptions
             form_field.clean(field.lower_bound)
             form_field.clean(field.upper_bound)
-            for value in [int(field.lower_bound + p * (field.possibilities() - 2)) for p in (.1, .3, .5, .7, .9)]:
+            for value in [int(field.lower_bound + p * (field.possibilities - 2)) for p in (.1, .3, .5, .7, .9)]:
                 form_field.clean(value)
             
             with self.assertRaises(ValidationError):
@@ -121,16 +132,15 @@ class FieldTests(SimpleTestCase):
                 form_field.clean(field.lower_bound)
             with self.assertRaises(ValidationError):
                 form_field.clean(field.upper_bound)
-            for value in [int(field.lower_bound + p * (field.possibilities() - 2)) for p in (.1, .3, .5, .7, .9)]:
+            for value in [int(field.lower_bound + p * (field.possibilities - 2)) for p in (.1, .3, .5, .7, .9)]:
                 with self.assertRaises(ValidationError):
                     form_field.clean(value)
             
             # no exceptions
-            possibilities = field.possibilities()
-            form_field.clean(field.lower_bound + possibilities)
-            form_field.clean(field.upper_bound + possibilities)
-            for value in [int(field.lower_bound + p * (field.possibilities() - 2)) for p in (.1, .3, .5, .7, .9)]:
-                form_field.clean(value + possibilities)
+            form_field.clean(field.lower_bound + field.possibilities)
+            form_field.clean(field.upper_bound + field.possibilities)
+            for value in [int(field.lower_bound + p * (field.possibilities - 2)) for p in (.1, .3, .5, .7, .9)]:
+                form_field.clean(value + field.possibilities)
     
     def test_integerfield_identifier_zfill_width(self):
         for field_cls in (NarrowPositiveIntegerField, RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField):

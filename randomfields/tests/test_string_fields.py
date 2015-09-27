@@ -1,26 +1,18 @@
 from django.apps import apps
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.forms.models import model_to_dict
 from django.test import TestCase, SimpleTestCase
 from django.utils.six import text_type
-from randomfields.fields.integer import IntegerIdentifierValue
-from ..apps import RandomFieldConfig
+from randomfields.models.fields.integer import IntegerIdentifierValue
+from randomfields.models.fields import RandomCharField, RandomTextField
+from . import mock
 from .checks import skipIf, DJANGO_VERSION_17
 from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 class AppConfigTests(SimpleTestCase):
-    app = "randomfields"
-    
-    def test_is_installed(self):
-        self.assertTrue(apps.is_installed(self.app))
-    
-    def test_is_app_config(self):
-        self.assertIsInstance(apps.get_app_config(self.app), RandomFieldConfig)
+    def test_app_is_installed(self):
+        self.assertTrue(apps.is_installed("randomfields"))
 
 class SaveTests(TestCase):
     def _test_identifier_expected_values(self, model_class, attr):
@@ -140,13 +132,13 @@ class SaveTests(TestCase):
         self.assertEqual(val1, obj1.unique_field)
         self.assertFalse(hasattr(obj1, field1.available_values_attname))
     
-    @mock.patch('randomfields.fields.logger')
+    @mock.patch('randomfields.models.fields.RandomFieldBase.logger')
     def test_warn_at_percent(self, mocked_logger):
         obj1 = TestMinLengthPossibilities()
         self.assertEqual(obj1._meta.get_field("data").valid_chars, "ab")
         self.assertEqual(obj1._meta.get_field("data").max_length, 2)
         self.assertEqual(obj1._meta.get_field("data").min_length, 1)
-        self.assertEqual(6, obj1._meta.get_field("data").possibilities())
+        self.assertEqual(6, obj1._meta.get_field("data").possibilities)
         self.assertEqual(0, TestMinLengthPossibilities.objects.count())
         
         warn_at = 0.55
@@ -180,7 +172,7 @@ class SaveTests(TestCase):
                 bb
                 b
         """
-        self.assertEqual(6, obj1._meta.get_field("data").possibilities())
+        self.assertEqual(6, obj1._meta.get_field("data").possibilities)
         
         # ensure all possibilities are saved
         while TestMinLengthPossibilities.objects.count() < 6:
@@ -201,7 +193,7 @@ class SaveTests(TestCase):
         obj1 = TestFixLengthPossibilities()
         self.assertEqual(obj1._meta.get_field("data").valid_chars, "ab")
         self.assertEqual(obj1._meta.get_field("data").max_length, 2)
-        self.assertIs(obj1._meta.get_field("data").min_length, None)
+        self.assertIs(obj1._meta.get_field("data").min_length, 2)
         """
             possibilities:
                 aa
@@ -209,7 +201,7 @@ class SaveTests(TestCase):
                 ba
                 bb
         """
-        self.assertEqual(4, obj1._meta.get_field("data").possibilities())
+        self.assertEqual(4, obj1._meta.get_field("data").possibilities)
         
         # ensure all possibilities are saved
         while TestFixLengthPossibilities.objects.count() < 4:
@@ -264,3 +256,67 @@ class SaveTests(TestCase):
         obj2.unique_int_field += 1
         obj2.save()
         self.assertEqual(obj2.unique_rand_field, val2)
+    
+    def test_string_formfield_validation(self):
+        for field_cls in (RandomCharField, RandomTextField):
+            field = field_cls(min_length=10, max_length=10)
+            form_field = field.formfield()
+
+            # no exceptions
+            form_field.clean(field.random())
+            
+            with self.assertRaises(ValidationError):
+                form_field.clean(field.random() + text_type("a"))
+            with self.assertRaises(ValidationError):
+                form_field.clean(field.random()[1:])
+    
+    def _test_string_field_kwargs(self, exeception_class, kwargs):
+        for field_cls in (RandomCharField, RandomTextField):
+            with self.assertRaises(exeception_class):
+                field_cls(**kwargs)
+    
+    def test_string_field_kwargs_max_length(self):
+        self._test_string_field_kwargs(TypeError, {})
+        self._test_string_field_kwargs(TypeError, {"max_length": None})
+        self._test_string_field_kwargs(ValueError, {"max_length": "foo"})
+        self._test_string_field_kwargs(ValueError, {"max_length": 0})
+    
+    def test_string_field_kwargs_min_length(self):
+        self._test_string_field_kwargs(TypeError, {"max_length": 50, "min_length": None})
+        self._test_string_field_kwargs(ValueError, {"max_length": 50, "min_length": "foo"})
+        self._test_string_field_kwargs(ValueError, {"max_length": 50, "min_length": -1})
+    
+    def test_string_field_kwargs_min_max_length(self):
+        self._test_string_field_kwargs(ValueError, {"max_length": 50, "min_length": 51})
+    
+    def test_string_field_kwargs_valid_chars(self):
+        self._test_string_field_kwargs(TypeError, {"max_length": 50, "valid_chars": 1})
+    
+    def _test_string_field_valid_chars_validation(self, field_cls, kwargs, value):
+        field = field_cls(**kwargs)
+        field.run_validators(value)
+            
+    def test_string_field_valid_chars_validation(self):
+        for field_cls in (RandomCharField, RandomTextField):
+            kwargs = {"max_length": 3, "valid_chars": "b"}
+            
+            # no exception
+            field = field_cls(**kwargs)
+            field.run_validators("bbb")
+            
+            with self.assertRaises(ValidationError):
+                self._test_string_field_valid_chars_validation(field_cls, kwargs, "abb")
+            with self.assertRaises(ValidationError):
+                self._test_string_field_valid_chars_validation(field_cls, kwargs, "bab")
+            with self.assertRaises(ValidationError):
+                self._test_string_field_valid_chars_validation(field_cls, kwargs, "bba")
+            
+            # no exception unicode
+            pi = b'\u03c0'.decode("unicode-escape")
+            self.assertEqual(len(pi), 1)
+            field = field_cls(**{"max_length": 3, "valid_chars": text_type("b%s") % pi})
+            field.run_validators(text_type("bb%s") % pi)
+            
+            with self.assertRaises(ValidationError):
+                self._test_string_field_valid_chars_validation(field_cls, kwargs, text_type("bb%s") % pi)
+            

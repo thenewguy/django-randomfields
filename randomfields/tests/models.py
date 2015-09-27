@@ -1,6 +1,6 @@
 from django.db import models
-from randomfields.fields.string import RandomCharField
-from randomfields.fields.integer import RandomIntegerIdentifierField
+from randomfields.models.fields.string import RandomCharField
+from randomfields.models.fields.integer import NarrowPositiveIntegerField, RandomIntegerIdentifierField
 from uuid import uuid4
 
 def unique_related_name():
@@ -59,5 +59,8 @@ class TestIdentifierM2MFKValue(models.Model):
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name='+')
 
 class TestMaskedAttrDetection(models.Model):
-    data_randomfields_available_values = "masked"
+    _randomfields_available_values_for_data = "masked"
     data = RandomIntegerIdentifierField()
+
+class TestNPIFieldChecks(models.Model):
+    data = NarrowPositiveIntegerField()

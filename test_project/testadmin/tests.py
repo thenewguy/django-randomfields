@@ -4,10 +4,11 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from randomfields.apps import RandomFieldTestConfig
+from randomfields.models.fields.base import RandomFieldBase
+from randomfields.models.fields import RandomCharField
+from randomfields.tests import mock
 from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
-from randomfields.tests.models import TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
-from randomfields.tests.test_string_fields import AppConfigTests
+from randomfields.tests.models import TestNPIFieldChecks, TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 
 class DatabaseTest(TestCase):
     def test_superuser_exists(self):
@@ -16,21 +17,43 @@ class DatabaseTest(TestCase):
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.check_password(settings.SUPERUSER_PASSWORD))
 
-class AppTestConfigTests(AppConfigTests):
-    def test_is_test_app_config(self):
-        self.assertIsInstance(apps.get_app_config(self.app), RandomFieldTestConfig)
+class AppTestConfigTests(TestCase):
+    def test_tests_are_installed(self):
+        self.assertTrue(apps.is_installed("randomfields.tests"))
+    
+    def _test_system_check(self, obj, key, expected=True):
+        errors = obj.check()
+        ids = [error.id for error in errors]
+        if expected:
+            self.assertIn(key, ids)
+        else:
+            self.assertNotIn(key, ids)
     
     def test_unsupported_fields(self):
-        config = apps.get_app_config(self.app)
-        
-        if DJANGO_VERSION_17:
-            self.assertTrue(config.unsupported_fields)
-        else:
-            self.assertFalse(config.unsupported_fields)
-    
+        self._test_system_check(TestIdentifierValue, "randomfields.models.fields.integer.identifier.IntegerIdentifierBase.Unsupported", DJANGO_VERSION_17)
+
     def test_masked_attrs(self):
-        config = apps.get_app_config(self.app)
-        self.assertTrue(config.masked_attrs)
+        self._test_system_check(TestMaskedAttrDetection, "randomfields.models.fields.base.RandomFieldBase.MaskedAttr")
+    
+    def test_narrow_positive_integer_field_depreciated(self):
+        self._test_system_check(TestNPIFieldChecks, "randomfields.models.fields.integer.base.NarrowPositiveIntegerField.Depreciated")
+    
+    @mock.patch('randomfields.models.fields.base.RandomFieldBase.urandom_available', new=False)
+    def test_insecure_prng_warning(self):
+        field = RandomFieldBase(name="foo")
+        field.attname = "bar"
+        field.model = TestNPIFieldChecks
+        self.assertFalse(field.urandom_available)
+        self._test_system_check(field, "randomfields.models.fields.base.RandomFieldBase.InsecurePRNG")
+    
+    def test_charfield_max_length_warning(self):
+        field = RandomCharField(name="foo", max_length=256)
+        field.attname = "bar"
+        field.model = TestNPIFieldChecks
+        self._test_system_check(field, "randomfields.models.fields.string.RandomCharField.MaxLengthGT255")
+        
+        field.max_length = 255
+        self._test_system_check(field, "randomfields.models.fields.string.RandomCharField.MaxLengthGT255", False)
 
 @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
 class IdentifierAdminTests(TestCase):
