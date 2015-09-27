@@ -1,4 +1,4 @@
-from django.core import checks
+from django.core import checks, validators
 from django.db import models
 from django.utils.six import text_type
 from django.utils.six.moves import range
@@ -29,6 +29,9 @@ class RandomStringFieldBase(RandomFieldBase):
         self.valid_chars = text_type(valid_chars)
         
         super(RandomStringFieldBase, self).__init__(*args, **kwargs)
+        
+        self.validators.append(validators.MaxLengthValidator(self.max_length))
+        self.validators.append(validators.MinLengthValidator(self.min_length))
         
         if self.min_length == self.max_length:
             self.possibilities = len(self.valid_chars) ** self.max_length
