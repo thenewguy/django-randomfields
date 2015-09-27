@@ -11,10 +11,8 @@ from .checks import skipIf, DJANGO_VERSION_17
 from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
 
 class AppConfigTests(SimpleTestCase):
-    app = "randomfields"
-    
     def test_app_is_installed(self):
-        self.assertTrue(apps.is_installed(self.app))
+        self.assertTrue(apps.is_installed("randomfields"))
 
 class SaveTests(TestCase):
     def _test_identifier_expected_values(self, model_class, attr):

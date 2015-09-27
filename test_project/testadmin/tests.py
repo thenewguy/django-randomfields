@@ -9,7 +9,6 @@ from randomfields.models.fields import RandomCharField
 from randomfields.tests import mock
 from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
 from randomfields.tests.models import TestNPIFieldChecks, TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
-from randomfields.tests.test_string_fields import AppConfigTests
 
 class DatabaseTest(TestCase):
     def test_superuser_exists(self):
@@ -18,9 +17,9 @@ class DatabaseTest(TestCase):
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.check_password(settings.SUPERUSER_PASSWORD))
 
-class AppTestConfigTests(AppConfigTests):
+class AppTestConfigTests(TestCase):
     def test_tests_are_installed(self):
-        self.assertTrue(apps.is_installed("%s.tests" % self.app))
+        self.assertTrue(apps.is_installed("randomfields.tests"))
     
     def _test_system_check(self, obj, key, expected=True):
         errors = obj.check()
