@@ -48,7 +48,7 @@ class RandomStringFieldBase(RandomFieldBase):
         defaults.update(kwargs)
         return super(RandomStringFieldBase, self).formfield(**kwargs)
 
-class RandomCharField(models.CharField, RandomStringFieldBase):
+class RandomCharField(RandomStringFieldBase, models.CharField):
     def check(self, **kwargs):
         errors = super(RandomCharField, self).check(**kwargs)
         if 255 < self.max_length:
@@ -60,5 +60,5 @@ class RandomCharField(models.CharField, RandomStringFieldBase):
             ))
         return errors
 
-class RandomTextField(models.TextField, RandomStringFieldBase):
+class RandomTextField(RandomStringFieldBase, models.TextField):
     pass

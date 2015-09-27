@@ -45,19 +45,19 @@ class RandomIntegerFieldBase(RandomFieldBase):
         defaults.update(kwargs)
         return super(RandomIntegerFieldBase, self).formfield(**defaults)
 
-class RandomBigIntegerField(models.BigIntegerField, RandomIntegerFieldBase):
+class RandomBigIntegerField(RandomIntegerFieldBase, models.BigIntegerField):
     bytes = 8
     unpack_fmt = "=q"
 
-class RandomIntegerField(models.IntegerField, RandomIntegerFieldBase):
+class RandomIntegerField(RandomIntegerFieldBase, models.IntegerField):
     bytes = 4
     unpack_fmt = "=i"
 
-class RandomSmallIntegerField(models.SmallIntegerField, RandomIntegerFieldBase):
+class RandomSmallIntegerField(RandomIntegerFieldBase, models.SmallIntegerField):
     bytes = 2
     unpack_fmt = "=h"
 
-class RandomNarrowIntegerField(models.IntegerField, RandomIntegerFieldBase):
+class RandomNarrowIntegerField(RandomIntegerFieldBase, models.IntegerField):
     """
         This field is a drop in replacement for AutoField primary keys.
         It returns a random integer between 1,000,000,000 and 2,147,483,647.
