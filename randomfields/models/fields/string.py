@@ -1,3 +1,4 @@
+import re
 from django.core import checks, validators
 from django.db import models
 from django.utils.six import text_type, string_types
@@ -36,6 +37,7 @@ class RandomStringFieldBase(RandomFieldBase):
         
         self.validators.append(validators.MaxLengthValidator(self.max_length))
         self.validators.append(validators.MinLengthValidator(self.min_length))
+        self.validators.append(validators.RegexValidator(regex=text_type("^[%s]+$") % re.escape(self.valid_chars)))
         
         if self.min_length == self.max_length:
             self.possibilities = len(self.valid_chars) ** self.max_length

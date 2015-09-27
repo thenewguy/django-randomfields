@@ -293,3 +293,22 @@ class SaveTests(TestCase):
     
     def test_string_field_kwargs_valid_chars(self):
         self._test_string_field_kwargs(TypeError, {"max_length": 50, "valid_chars": 1})
+    
+    def _test_string_field_valid_chars_validation(self, field_cls, kwargs, value):
+        field = field_cls(**kwargs)
+        field.run_validators(value)
+            
+    def test_string_field_valid_chars_validation(self):
+        for field_cls in (RandomCharField, RandomTextField):
+            kwargs = {"max_length": 3, "valid_chars": "b"}
+            
+            # no exception
+            field = field_cls(**kwargs)
+            field.run_validators("bbb")
+            
+            with self.assertRaises(ValidationError):
+                self._test_string_field_valid_chars_validation(field_cls, kwargs, "abb")
+            with self.assertRaises(ValidationError):
+                self._test_string_field_valid_chars_validation(field_cls, kwargs, "bab")
+            with self.assertRaises(ValidationError):
+                self._test_string_field_valid_chars_validation(field_cls, kwargs, "bba")
