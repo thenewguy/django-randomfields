@@ -193,7 +193,7 @@ class SaveTests(TestCase):
         obj1 = TestFixLengthPossibilities()
         self.assertEqual(obj1._meta.get_field("data").valid_chars, "ab")
         self.assertEqual(obj1._meta.get_field("data").max_length, 2)
-        self.assertIs(obj1._meta.get_field("data").min_length, None)
+        self.assertIs(obj1._meta.get_field("data").min_length, 2)
         """
             possibilities:
                 aa
