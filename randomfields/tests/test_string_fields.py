@@ -312,3 +312,13 @@ class SaveTests(TestCase):
                 self._test_string_field_valid_chars_validation(field_cls, kwargs, "bab")
             with self.assertRaises(ValidationError):
                 self._test_string_field_valid_chars_validation(field_cls, kwargs, "bba")
+            
+            # no exception unicode
+            pi = b'\u03c0'.decode("unicode-escape")
+            self.assertEqual(len(pi), 1)
+            field = field_cls(**{"max_length": 3, "valid_chars": text_type("b%s") % pi})
+            field.run_validators(text_type("bb%s") % pi)
+            
+            with self.assertRaises(ValidationError):
+                self._test_string_field_valid_chars_validation(field_cls, kwargs, text_type("bb%s") % pi)
+            
