@@ -1,4 +1,4 @@
-from django.core import checks
+from django.core import checks, validators
 from django.db import models
 from django.utils.six import text_type, string_types
 from django.utils.six.moves import range
@@ -68,4 +68,6 @@ class RandomCharField(RandomStringFieldBase, models.CharField):
         return errors
 
 class RandomTextField(RandomStringFieldBase, models.TextField):
-    pass
+    def __init__(self, *args, **kwargs):
+        super(RandomTextField, self).__init__(*args, **kwargs)
+        self.validators.append(validators.MaxLengthValidator(self.max_length))
