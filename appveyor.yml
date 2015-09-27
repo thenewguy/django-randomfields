@@ -1,8 +1,9 @@
 build: false  # Not a C# project, build stuff at the test step instead.
 environment:
   global:
-    PYTHON: "C:\\Python27-x64"
+    PYTHON: C:/Python27
   matrix:
+    - TOXENV: py27-django-17
     - TOXENV: py27-django-18
     - TOXENV: py27-django-19
     - TOXENV: py27-django-master
