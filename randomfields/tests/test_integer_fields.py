@@ -1,11 +1,22 @@
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 from django.utils.six.moves import range
+from randomfields.models.fields import RandomFieldBase
 from randomfields.models.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \
                                         NarrowPositiveIntegerField
 
 class FieldTests(SimpleTestCase):
+    def test_zero_possibilities(self):
+        field = RandomFieldBase()
+        with self.assertRaises(NotImplementedError):
+            field.possibilities
+        with self.assertRaises(ValueError):
+            field.possibilities = 0
+        field.possibilities = 7
+        with self.assertRaises(NotImplementedError):
+            field.possibilities = 12
+                
     def test_invalid_rifb_attrs(self):
         class InvalidAttrs1(RandomIntegerFieldBase):
             bytes = None
