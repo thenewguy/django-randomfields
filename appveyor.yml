@@ -1,5 +1,7 @@
 build: false  # Not a C# project, build stuff at the test step instead.
 environment:
+  global:
+    PYTHON: "C:\\Python27-x64"
   matrix:
     - JOB: 1
       TOXENV: py27-django-18
@@ -24,6 +26,7 @@ environment:
     - JOB: 11
       TOXENV: py35-django-master
 install:
+  - SET PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
   - pip install tox
 test_script:
   - tox
