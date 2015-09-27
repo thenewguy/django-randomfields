@@ -26,6 +26,16 @@ class IntegerIdentifierValue(object):
         lower_bound = int(lower_bound)
         upper_bound = int(upper_bound)
         
+        # verify values are acceptable
+        if not 0 < possibilities:
+            # this is the only check performed for possibilities at the moment.
+            # we do not know the acceptable values between lower_bound and
+            # upper_bound so we cannot validate the possibility count
+            raise ValueError("possibilities must be a positive integer")
+        
+        if not lower_bound < upper_bound:
+            raise ValueError("upper_bound must be greater than lower_bound")
+        
         # for 32 bit int, possibilities is 4,294,967,296
         # because the possible unsigned values are [0, 4294967295]
         # In this case, map 0 to 4,294,967,296 and map

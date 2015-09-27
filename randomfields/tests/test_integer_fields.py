@@ -4,7 +4,7 @@ from django.utils.six.moves import range
 from randomfields.models.fields import RandomFieldBase
 from randomfields.models.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \
-                                        NarrowPositiveIntegerField
+                                        NarrowPositiveIntegerField, IntegerIdentifierValue
 
 class FieldTests(SimpleTestCase):
     def test_zero_possibilities(self):
@@ -150,3 +150,33 @@ class FieldTests(SimpleTestCase):
             lb_len = len(lb)
             ub_len = len(ub)
             self.assertEqual(lb_len, ub_len, "{} and {} are of different string width, {} != {}".format(lb, ub, lb_len, ub_len))
+    
+    def _test_integer_identifier_value_inputs(self, excClass, *args):
+        with self.assertRaises(excClass):
+            IntegerIdentifierValue(*args)
+    
+    def test_integer_identifier_value_inputs(self):
+        # no exceptions
+        value = 1
+        possibilities = 3
+        lower_bound = -1
+        upper_bound = 1
+        IntegerIdentifierValue(value, possibilities, lower_bound, upper_bound)
+        
+        # test invalid type
+        self._test_integer_identifier_value_inputs(TypeError, None, possibilities, lower_bound, upper_bound)
+        self._test_integer_identifier_value_inputs(TypeError, value, None, lower_bound, upper_bound)
+        self._test_integer_identifier_value_inputs(TypeError, value, possibilities, None, upper_bound)
+        self._test_integer_identifier_value_inputs(TypeError, value, possibilities, lower_bound, None)
+        
+        # test invalid value
+        self._test_integer_identifier_value_inputs(ValueError, "foo", possibilities, lower_bound, upper_bound)
+        self._test_integer_identifier_value_inputs(ValueError, value, "foo", lower_bound, upper_bound)
+        self._test_integer_identifier_value_inputs(ValueError, value, possibilities, "foo", upper_bound)
+        self._test_integer_identifier_value_inputs(ValueError, value, possibilities, lower_bound, "foo")
+        
+        # test upper_bound < lower_bound
+        self._test_integer_identifier_value_inputs(ValueError, value, possibilities, upper_bound+1, upper_bound)
+        
+        # test invalid possibilities
+        self._test_integer_identifier_value_inputs(ValueError, value, 0, lower_bound, upper_bound)
