@@ -68,7 +68,21 @@ class RandomStringFieldBase(RandomFieldBase):
         return super(RandomStringFieldBase, self).formfield(**kwargs)
 
 class RandomCharField(models.CharField, RandomStringFieldBase):
-    pass
+    def check_max_length(self, **kwargs):
+        errors = super(RandomCharField, self).check_max_length(**kwargs)
+        try:
+            max_length = int(self.max_length)
+        except (ValueError, TypeError):
+            pass
+        else:
+            if 255 < max_length:
+                errors.append(checks.Warning(
+                    "It is recommended to restrict the CharField 'max_length' kwarg to 255 or less for database portability.",
+                    hint="Use 'RandomTextField' instead.",
+                    obj=self,
+                    id='%s.%s.MaxLengthGT255' % (__name__, self.__class__.__name__),
+                ))
+        return errors
 
 class RandomTextField(models.TextField, RandomStringFieldBase):
     pass
