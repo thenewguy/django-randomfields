@@ -292,7 +292,11 @@ class SaveTests(TestCase):
     def test_string_field_kwargs_valid_chars(self):
         self._test_string_field_kwargs(TypeError, {"max_length": 50, "valid_chars": 1})
     
-    def _test_string_field_valid_chars_validation(self, field_cls, kwargs, value):
+    def _test_string_field_formfield_validation(self, model_field_cls, kwargs, value):
+        field = model_field_cls(**kwargs)
+        field.formfield().clean(value)
+    
+    def _test_string_field_validation(self, field_cls, kwargs, value):
         field = field_cls(**kwargs)
         field.run_validators(value)
             
@@ -301,22 +305,25 @@ class SaveTests(TestCase):
             kwargs = {"max_length": 3, "valid_chars": "b"}
             
             # no exception
-            field = field_cls(**kwargs)
-            field.run_validators("bbb")
+            self._test_string_field_formfield_validation(field_cls, kwargs, "bbb")
             
             with self.assertRaises(ValidationError):
-                self._test_string_field_valid_chars_validation(field_cls, kwargs, "abb")
+                self._test_string_field_formfield_validation(field_cls, kwargs, "abb")
             with self.assertRaises(ValidationError):
-                self._test_string_field_valid_chars_validation(field_cls, kwargs, "bab")
+                self._test_string_field_formfield_validation(field_cls, kwargs, "bab")
             with self.assertRaises(ValidationError):
-                self._test_string_field_valid_chars_validation(field_cls, kwargs, "bba")
+                self._test_string_field_formfield_validation(field_cls, kwargs, "bba")
             
             # no exception unicode
             pi = b'\u03c0'.decode("unicode-escape")
-            self.assertEqual(len(pi), 1)
-            field = field_cls(**{"max_length": 3, "valid_chars": text_type("b%s") % pi})
-            field.run_validators(text_type("bb%s") % pi)
+            pi_value = text_type("bb%s") % pi
+            self.assertEqual(len(pi_value), 3)
+            self._test_string_field_formfield_validation(field_cls, {"max_length": 3, "valid_chars": pi_value}, "bbb")
             
             with self.assertRaises(ValidationError):
-                self._test_string_field_valid_chars_validation(field_cls, kwargs, text_type("bb%s") % pi)
+                self._test_string_field_formfield_validation(field_cls, kwargs, pi_value)
             
+            # model field should not raise exception so that valid chars
+            # can change without invalidating the database value
+            self._test_string_field_validation(field_cls, kwargs, "bba")
+            self._test_string_field_validation(field_cls, kwargs, pi_value)
