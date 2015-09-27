@@ -3,28 +3,17 @@ environment:
   global:
     PYTHON: "C:\\Python27-x64"
   matrix:
-    - JOB: 1
-      TOXENV: py27-django-18
-    - JOB: 2
-      TOXENV: py27-django-19
-    - JOB: 3
-      TOXENV: py27-django-master
-    - JOB: 4
-      TOXENV: py33-django-17
-    - JOB: 5
-      TOXENV: py33-django-18
-    - JOB: 6
-      TOXENV: py34-django-17
-    - JOB: 7
-      TOXENV: py34-django-18
-    - JOB: 8
-      TOXENV: py34-django-19
-    - JOB: 9
-      TOXENV: py34-django-master
-    - JOB: 10
-      TOXENV: py35-django-19
-    - JOB: 11
-      TOXENV: py35-django-master
+    - TOXENV: py27-django-18
+    - TOXENV: py27-django-19
+    - TOXENV: py27-django-master
+    - TOXENV: py33-django-17
+    - TOXENV: py33-django-18
+    - TOXENV: py34-django-17
+    - TOXENV: py34-django-18
+    - TOXENV: py34-django-19
+    - TOXENV: py34-django-master
+    - TOXENV: py35-django-19
+    - TOXENV: py35-django-master
 install:
   - SET PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
   - pip install -U tox virtualenv
