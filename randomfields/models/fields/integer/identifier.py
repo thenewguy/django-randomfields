@@ -55,7 +55,7 @@ class IntegerIdentifierValue(object):
     def __str__(self):
         return self.display_str
 
-    def _convert_other_for_comparison(self, other):
+    def _values_for_comparison(self, other):
         value = None
         known_types = tuple(chain(string_types, integer_types, [IntegerIdentifierValue]))
         if not isinstance(other, known_types):
@@ -80,11 +80,11 @@ class IntegerIdentifierValue(object):
         return value, other
         
     def __eq__(self, other):
-        value, other = self._convert_other_for_comparison(other)
+        value, other = self._values_for_comparison(other)
         return value == other
     
     def __lt__(self, other):
-        value, other = self._convert_other_for_comparison(other)
+        value, other = self._values_for_comparison(other)
         return value < other
 
 class IntegerIdentifierBase(models.Field):
