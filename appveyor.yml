@@ -27,7 +27,7 @@ environment:
       TOXENV: py35-django-master
 install:
   - SET PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
-  - pip install tox
+  - pip install -U tox virtualenv
 test_script:
   - tox
 
