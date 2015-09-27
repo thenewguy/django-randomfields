@@ -4,15 +4,20 @@ from shlex import split
 from sys import version_info
 
 class RunTestsCommand(SetuptoolsTestCommand):
-    user_options = [('only=', 'o', 'Only run the specified tests')]
+    user_options = [
+        ('only=', 'o', 'Only run the specified tests'),
+        ('level=', 'l', 'Verbosity level; 0=minimal output, 1=normal output, 2=verbose output, 3=very verbose output')
+    ]
     def initialize_options(self):
         SetuptoolsTestCommand.initialize_options(self)
         self.test_suite = "override"
         self.only = ""
+        self.level = "1"
 
     def finalize_options(self):
         SetuptoolsTestCommand.finalize_options(self)
         self.test_suite = None
+        self.level = int(self.level)
 
     def run(self):
         SetuptoolsTestCommand.run(self)
@@ -31,7 +36,7 @@ class RunTestsCommand(SetuptoolsTestCommand):
         tests = split(self.only)
         if not tests:
             tests.extend([nwd, os.path.abspath('test_project')])
-        errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test'] + tests)
+        errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test', '--verbosity=%d' % self.level] + tests)
         coverage.cmdline.main(['report', '-m'])
         
         if None not in [os.getenv("TRAVIS", None), os.getenv("TRAVIS_JOB_ID", None), os.getenv("TRAVIS_BRANCH", None)]:
