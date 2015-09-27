@@ -1,9 +1,11 @@
 from django.apps import apps
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.forms.models import model_to_dict
 from django.test import TestCase, SimpleTestCase
 from django.utils.six import text_type
 from randomfields.models.fields.integer import IntegerIdentifierValue
+from randomfields.models.fields import RandomCharField, RandomTextField
 from . import mock
 from .checks import skipIf, DJANGO_VERSION_17
 from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
@@ -256,3 +258,16 @@ class SaveTests(TestCase):
         obj2.unique_int_field += 1
         obj2.save()
         self.assertEqual(obj2.unique_rand_field, val2)
+    
+    def test_string_formfield_validation(self):
+        for field_cls in (RandomCharField, RandomTextField):
+            field = field_cls(min_length=10, max_length=10)
+            form_field = field.formfield()
+
+            # no exceptions
+            form_field.clean(field.random())
+            
+            with self.assertRaises(ValidationError):
+                form_field.clean(field.random() + text_type("a"))
+            with self.assertRaises(ValidationError):
+                form_field.clean(field.random()[1:])
