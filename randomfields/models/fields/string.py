@@ -1,6 +1,6 @@
 from django.core import checks, validators
 from django.db import models
-from django.utils.six import text_type
+from django.utils.six import text_type, string_types
 from django.utils.six.moves import range
 from .base import RandomFieldBase, random
 
@@ -23,10 +23,14 @@ class RandomStringFieldBase(RandomFieldBase):
         else:
             if min_length < 0:
                 raise ValueError("If set, 'min_length' must an integer greater than zero.")
+            if max_length < min_length:
+                raise ValueError("'min_length' cannot be larger than max_length.")
         self.min_length = min_length
         
         valid_chars = kwargs.pop("valid_chars", default_valid_chars)
-        self.valid_chars = text_type(valid_chars)
+        if not isinstance(valid_chars, string_types):
+            raise TypeError("valid_chars must be of string type")
+        self.valid_chars = text_type(valid_chars) 
         
         super(RandomStringFieldBase, self).__init__(*args, **kwargs)
         

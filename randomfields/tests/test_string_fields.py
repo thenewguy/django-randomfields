@@ -271,3 +271,25 @@ class SaveTests(TestCase):
                 form_field.clean(field.random() + text_type("a"))
             with self.assertRaises(ValidationError):
                 form_field.clean(field.random()[1:])
+    
+    def _test_string_field_kwargs(self, exeception_class, kwargs):
+        for field_cls in (RandomCharField, RandomTextField):
+            with self.assertRaises(exeception_class):
+                field_cls(**kwargs)
+    
+    def test_string_field_kwargs_max_length(self):
+        self._test_string_field_kwargs(TypeError, {})
+        self._test_string_field_kwargs(TypeError, {"max_length": None})
+        self._test_string_field_kwargs(ValueError, {"max_length": "foo"})
+        self._test_string_field_kwargs(ValueError, {"max_length": 0})
+    
+    def test_string_field_kwargs_min_length(self):
+        self._test_string_field_kwargs(TypeError, {"max_length": 50, "min_length": None})
+        self._test_string_field_kwargs(ValueError, {"max_length": 50, "min_length": "foo"})
+        self._test_string_field_kwargs(ValueError, {"max_length": 50, "min_length": -1})
+    
+    def test_string_field_kwargs_min_max_length(self):
+        self._test_string_field_kwargs(ValueError, {"max_length": 50, "min_length": 51})
+    
+    def test_string_field_kwargs_valid_chars(self):
+        self._test_string_field_kwargs(TypeError, {"max_length": 50, "valid_chars": 1})
