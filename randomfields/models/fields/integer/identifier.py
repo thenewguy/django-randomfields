@@ -9,7 +9,7 @@ from .base import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerF
 
 @python_2_unicode_compatible
 @total_ordering
-class IntegerIdentifierValue(object):
+class IntegerIdentifier(object):
     db_value = None
     display_value = None
     display_str = None
@@ -18,7 +18,7 @@ class IntegerIdentifierValue(object):
     possibilities = None
     
     def __init__(self, value, possibilities, lower_bound, upper_bound):
-        super(IntegerIdentifierValue, self).__init__()
+        super(IntegerIdentifier, self).__init__()
         
         # verify types are acceptable
         value = int(value)
@@ -67,7 +67,7 @@ class IntegerIdentifierValue(object):
 
     def _values_for_comparison(self, other):
         value = None
-        known_types = tuple(chain(string_types, integer_types, [IntegerIdentifierValue]))
+        known_types = tuple(chain(string_types, integer_types, [IntegerIdentifier]))
         if not isinstance(other, known_types):
             try:
                 other = int(other)
@@ -77,8 +77,8 @@ class IntegerIdentifierValue(object):
                 except (TypeError, ValueError):
                     pass
         if isinstance(other, integer_types):
-            other = IntegerIdentifierValue(other, self.possibilities, self.lower_bound, self.upper_bound)
-        if isinstance(other, IntegerIdentifierValue):
+            other = IntegerIdentifier(other, self.possibilities, self.lower_bound, self.upper_bound)
+        if isinstance(other, IntegerIdentifier):
             value = int(self)
             other = int(other)
         if isinstance(other, string_types):
@@ -102,8 +102,8 @@ class IntegerIdentifierValue(object):
 
 class RandomIntegerIdentifierFieldMixin(object):
     def to_python(self, value):
-        if value is not None and not isinstance(value, IntegerIdentifierValue):
-            value = IntegerIdentifierValue(value, self.possibilities, self.lower_bound, self.upper_bound)
+        if value is not None and not isinstance(value, IntegerIdentifier):
+            value = IntegerIdentifier(value, self.possibilities, self.lower_bound, self.upper_bound)
         return value
     
     def get_prep_value(self, value):
@@ -113,7 +113,7 @@ class RandomIntegerIdentifierFieldMixin(object):
     
     def get_db_prep_value(self, *args, **kwargs):
         value = super(RandomIntegerIdentifierFieldMixin, self).get_db_prep_value(*args, **kwargs)
-        if isinstance(value, IntegerIdentifierValue):
+        if isinstance(value, IntegerIdentifier):
             value = int(value)
         return value
     
@@ -122,12 +122,12 @@ class RandomIntegerIdentifierFieldMixin(object):
     
     def random(self):
         value = super(RandomIntegerIdentifierFieldMixin, self).random()
-        return IntegerIdentifierValue(value, self.possibilities, self.lower_bound, self.upper_bound)
+        return IntegerIdentifier(value, self.possibilities, self.lower_bound, self.upper_bound)
     
     def formfield(self, **kwargs):
         defaults = {
-            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
-            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
+            'min_value': IntegerIdentifier(self.lower_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
+            'max_value': IntegerIdentifier(self.upper_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
         }
         defaults.update(kwargs)
         return super(RandomIntegerIdentifierFieldMixin, self).formfield(**defaults)

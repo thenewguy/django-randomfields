@@ -4,7 +4,7 @@ from django.utils.six.moves import range
 from randomfields.models.fields import RandomFieldBase
 from randomfields.models.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \
-                                        NarrowPositiveIntegerField, IntegerIdentifierValue
+                                        NarrowPositiveIntegerField, IntegerIdentifier
 from .. import random
 from . import mock
 
@@ -259,19 +259,19 @@ class FieldTests(SimpleTestCase):
     
     def _test_integer_identifier_value_inputs(self, excClass, *args):
         with self.assertRaises(excClass):
-            IntegerIdentifierValue(*args)
+            IntegerIdentifier(*args)
     
     def test_integer_identifier_hashable(self):
-        value1 = IntegerIdentifierValue(1, 3, -1, 1)
+        value1 = IntegerIdentifier(1, 3, -1, 1)
         value1_hash = hash(value1)
         
-        value1_dup = IntegerIdentifierValue(1, 3, -1, 1)
+        value1_dup = IntegerIdentifier(1, 3, -1, 1)
         value1_dup_hash = hash(value1_dup)
         
-        value2 = IntegerIdentifierValue(0, 3, -1, 1)
+        value2 = IntegerIdentifier(0, 3, -1, 1)
         value2_hash = hash(value2)
         
-        value3 = IntegerIdentifierValue(-1, 3, -1, 1)
+        value3 = IntegerIdentifier(-1, 3, -1, 1)
         value3_hash = hash(value3)
         
         self.assertEqual(value1_hash, value1_dup_hash)
@@ -284,7 +284,7 @@ class FieldTests(SimpleTestCase):
         possibilities = 3
         lower_bound = -1
         upper_bound = 1
-        IntegerIdentifierValue(value, possibilities, lower_bound, upper_bound)
+        IntegerIdentifier(value, possibilities, lower_bound, upper_bound)
         
         # test invalid type
         self._test_integer_identifier_value_inputs(TypeError, None, possibilities, lower_bound, upper_bound)
