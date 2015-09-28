@@ -48,6 +48,42 @@ class FieldTests(SimpleTestCase):
                     # verify mocked_insecure_random.randint was called
                     self.assertEqual(mocked_insecure_random.randint.call_count, 1)
     
+    @mock.patch('randomfields.random.secure_random')
+    def test_random_coice(self, mocked_secure_random):
+        # verify secure_random was mocked
+        self.assertIsInstance(random.secure_random, mocked_secure_random.__class__)
+        
+        # verify secure_random.choice hasn't been called
+        self.assertEqual(mocked_secure_random.choice.call_count, 0)
+        random.choice("ab")
+        
+        # verify secure_random.choice was called
+        self.assertEqual(mocked_secure_random.choice.call_count, 1)
+        
+        # override secure_random.choice so that it raises a NotImplementedError
+        mocked_secure_random.choice = raise_not_implemented
+        with self.assertRaises(NotImplementedError):
+            mocked_secure_random.choice("ab")
+        
+        with mock.patch('randomfields.random.log_exceptions', new=True):
+            # force the exception to be logged
+            self.assertTrue(random.log_exceptions)
+            
+            with mock.patch('randomfields.random.insecure_random') as mocked_insecure_random:
+                with mock.patch('randomfields.random.logger') as mocked_logger:
+                    # mock the logger so we can verify the exception gets logged
+                    self.assertEqual(mocked_logger.exception.call_count, 0)
+                    
+                    # verify the mocked insecure_random.choice hasn't been called
+                    self.assertEqual(mocked_insecure_random.choice.call_count, 0)
+                    random.choice("ab")
+                    
+                    # verify exception was logged
+                    self.assertEqual(mocked_logger.exception.call_count, 1)
+                    
+                    # verify mocked_insecure_random.choice was called
+                    self.assertEqual(mocked_insecure_random.choice.call_count, 1)
+    
     def test_zero_possibilities(self):
         field = RandomFieldBase()
         with self.assertRaises(NotImplementedError):
