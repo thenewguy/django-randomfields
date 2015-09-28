@@ -96,6 +96,9 @@ class IntegerIdentifierValue(object):
     def __lt__(self, other):
         value, other = self._values_for_comparison(other)
         return value < other
+    
+    def __hash__(self):
+        return hash(text_type("{};{}").format(int(self), text_type(self)))
 
 class IntegerIdentifierBase(models.Field):
     def to_python(self, value):
