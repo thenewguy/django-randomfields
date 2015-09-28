@@ -117,6 +117,26 @@ class IntegerIdentifierBase(models.Field):
     def from_db_value(self, value, *args):
         return self.to_python(value)
     
+    def contribute_to_class(self, cls, name):
+        super(IntegerIdentifierBase, self).contribute_to_class(cls, name)
+        cls_save = cls.save
+        def save_wrapper(obj, *args, **kwargs):
+            cls_save(obj, *args, **kwargs)
+            #
+            # HACK
+            #    Model.objects.create() doesn't convert the value to_python
+            #    so instances created in this fashion have the int db_value
+            #    instead of an IntegerIdentifierValue. An obvious symptom
+            #    is the admin redirect on create uses the incorrect value.
+            #    While it still works due to the approach of 
+            #    IntegerIdentifierValue, the redirect uses the db value
+            #    instead of the display value.
+            #
+            value = getattr(obj, self.attname)
+            value = self.to_python(value)
+            setattr(obj, self.attname, value)
+        cls.save = save_wrapper
+    
     def formfield(self, **kwargs):
         defaults = {
             'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
