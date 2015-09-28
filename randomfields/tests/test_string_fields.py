@@ -57,6 +57,19 @@ class SaveTests(TestCase):
     @skipIf(DJANGO_VERSION_17, "Not supported on Django 17")
     def test_identifier_expected_values_data(self):
         self._test_identifier_expected_values(TestIdentifierData, "data")
+    
+    def test_identifier_pk_value_on_create(self):
+        obj = TestIdentifierValue.objects.create()
+        field = TestIdentifierValue._meta.get_field("id")
+        expected_value = field.to_python(obj.id)
+        expected_value = int(text_type(expected_value))
+        value = int(text_type(obj.id))
+        self.assertEqual(value, expected_value)
+    
+    def test_identifier_pk_type_on_create(self):
+        obj = TestIdentifierValue.objects.create()
+        self.assertIsInstance(obj.id, IntegerIdentifierValue)
+        self.assertIsInstance(obj.pk, IntegerIdentifierValue)
             
     def test_auto_primary_key(self):
         obj = TestPrimaryKey()
@@ -73,7 +86,7 @@ class SaveTests(TestCase):
         
         with self.assertRaises(IntegrityError):
             TestPrimaryKey.objects.create(pk=pk)
-
+    
     def test_collision_not_corrected_when_set_manually(self):
         obj1 = TestUnique()
         obj1.save()

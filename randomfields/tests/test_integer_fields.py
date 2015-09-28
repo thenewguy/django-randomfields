@@ -261,6 +261,23 @@ class FieldTests(SimpleTestCase):
         with self.assertRaises(excClass):
             IntegerIdentifierValue(*args)
     
+    def test_integer_identifier_hashable(self):
+        value1 = IntegerIdentifierValue(1, 3, -1, 1)
+        value1_hash = hash(value1)
+        
+        value1_dup = IntegerIdentifierValue(1, 3, -1, 1)
+        value1_dup_hash = hash(value1_dup)
+        
+        value2 = IntegerIdentifierValue(0, 3, -1, 1)
+        value2_hash = hash(value2)
+        
+        value3 = IntegerIdentifierValue(-1, 3, -1, 1)
+        value3_hash = hash(value3)
+        
+        self.assertEqual(value1_hash, value1_dup_hash)
+        self.assertNotEqual(value1_hash, value2_hash)
+        self.assertNotEqual(value1_hash, value3_hash)
+    
     def test_integer_identifier_value_inputs(self):
         # no exceptions
         value = 1
