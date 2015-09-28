@@ -19,21 +19,18 @@ class FieldTests(SimpleTestCase):
                 
     def test_invalid_rifb_attrs(self):
         class InvalidAttrs1(RandomIntegerFieldBase):
+            # lower_bound and upper_bound must be specified when bytes is not
             bytes = None
             lower_bound = None
             upper_bound = None
-        
-        class InvalidAttrs2(RandomIntegerFieldBase):
-            bytes = 4
-            unpack_fmt = None
             
-        class InvalidAttrs3(RandomIntegerFieldBase):
+        class InvalidAttrs2(RandomIntegerFieldBase):
+            # lower_bound and upper_bound must be None when bytes is specified
             bytes = 4
-            unpack_fmt = "=i"
             lower_bound = 5
             upper_bound = 10
         
-        for cls in [InvalidAttrs1, InvalidAttrs2, InvalidAttrs3]:
+        for cls in [InvalidAttrs1, InvalidAttrs2]:
             with self.assertRaises(TypeError):
                 cls()
         
