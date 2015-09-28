@@ -100,7 +100,7 @@ class IntegerIdentifierValue(object):
     def __hash__(self):
         return hash(text_type("{};{}").format(int(self), text_type(self)))
 
-class IntegerIdentifierBase(models.Field):
+class RandomIntegerIdentifierFieldMixin(object):
     def to_python(self, value):
         if value is not None and not isinstance(value, IntegerIdentifierValue):
             value = IntegerIdentifierValue(value, self.possibilities, self.lower_bound, self.upper_bound)
@@ -112,7 +112,7 @@ class IntegerIdentifierBase(models.Field):
         return value
     
     def get_db_prep_value(self, *args, **kwargs):
-        value = super(IntegerIdentifierBase, self).get_db_prep_value(*args, **kwargs)
+        value = super(RandomIntegerIdentifierFieldMixin, self).get_db_prep_value(*args, **kwargs)
         if isinstance(value, IntegerIdentifierValue):
             value = int(value)
         return value
@@ -121,7 +121,7 @@ class IntegerIdentifierBase(models.Field):
         return self.to_python(value)
     
     def random(self):
-        value = super(IntegerIdentifierBase, self).random()
+        value = super(RandomIntegerIdentifierFieldMixin, self).random()
         return IntegerIdentifierValue(value, self.possibilities, self.lower_bound, self.upper_bound)
     
     def formfield(self, **kwargs):
@@ -130,24 +130,24 @@ class IntegerIdentifierBase(models.Field):
             'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
         }
         defaults.update(kwargs)
-        return super(IntegerIdentifierBase, self).formfield(**defaults)
+        return super(RandomIntegerIdentifierFieldMixin, self).formfield(**defaults)
     
     def check(self, **kwargs):
-        errors = super(IntegerIdentifierBase, self).check(**kwargs)
+        errors = super(RandomIntegerIdentifierFieldMixin, self).check(**kwargs)
         if DJANGO_VERSION_LT_18:
             errors.append(checks.Critical(
                 'IntegerIdentifier fields are not supported on Django versions less than 1.8.',
                 hint='Use RandomNarrowIntegerField instead.',
                 obj=self,
-                id='%s.IntegerIdentifierBase.Unsupported' % __name__,
+                id='%s.RandomIntegerIdentifierFieldMixin.Unsupported' % __name__,
             ))
         return errors
 
-class RandomBigIntegerIdentifierField(IntegerIdentifierBase, RandomBigIntegerField):
+class RandomBigIntegerIdentifierField(RandomIntegerIdentifierFieldMixin, RandomBigIntegerField):
     pass
 
-class RandomIntegerIdentifierField(IntegerIdentifierBase, RandomIntegerField):
+class RandomIntegerIdentifierField(RandomIntegerIdentifierFieldMixin, RandomIntegerField):
     pass
 
-class RandomSmallIntegerIdentifierField(IntegerIdentifierBase, RandomSmallIntegerField):
+class RandomSmallIntegerIdentifierField(RandomIntegerIdentifierFieldMixin, RandomSmallIntegerField):
     pass

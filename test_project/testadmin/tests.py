@@ -31,7 +31,7 @@ class AppTestConfigTests(TestCase):
             self.assertNotIn(key, ids)
     
     def test_unsupported_fields(self):
-        self._test_system_check(TestIdentifierValue, "randomfields.models.fields.integer.identifier.IntegerIdentifierBase.Unsupported", DJANGO_VERSION_17)
+        self._test_system_check(TestIdentifierValue, "randomfields.models.fields.integer.identifier.RandomIntegerIdentifierFieldMixin.Unsupported", DJANGO_VERSION_17)
 
     def test_masked_attrs(self):
         self._test_system_check(TestMaskedAttrDetection, "randomfields.models.fields.base.RandomFieldBase.MaskedAttr")

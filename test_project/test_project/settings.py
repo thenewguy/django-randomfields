@@ -112,7 +112,7 @@ SUPERUSER_EMAIL = "admin@example.com"
 SUPERUSER_PASSWORD = "admin"
 
 SILENCED_SYSTEM_CHECKS = [
-    "randomfields.models.fields.integer.identifier.IntegerIdentifierBase.Unsupported",
+    "randomfields.models.fields.integer.identifier.RandomIntegerIdentifierFieldMixin.Unsupported",
     "randomfields.models.fields.base.RandomFieldBase.MaskedAttr",
     "randomfields.models.fields.integer.base.NarrowPositiveIntegerField.Depreciated",
     "randomfields.models.fields.base.RandomFieldBase.InsecurePRNG",
