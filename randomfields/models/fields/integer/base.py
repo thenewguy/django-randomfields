@@ -1,22 +1,18 @@
 from django.core import checks
 from django.db import models
-from ..base import RandomFieldBase, urandom_available, urandom, random
-
-if urandom_available:
-    from struct import unpack
+from .... import random
+from ..base import RandomFieldBase
 
 class RandomIntegerFieldBase(RandomFieldBase):
     bytes = None
-    unpack_fmt = None
     lower_bound = None
     upper_bound = None
     
     def __init__(self, *args, **kwargs):
         super(RandomIntegerFieldBase, self).__init__(*args, **kwargs)
         
-        if self.bytes:
-            if self.unpack_fmt is None:
-                raise TypeError("unpack_fmt must not be None when bytes is specified")
+        if self.bytes is not None:
+            self.bytes = int(self.bytes)
             
             if self.lower_bound is None and self.upper_bound is None:
                 bit_exp = self.bytes * 8 - 1
@@ -25,17 +21,16 @@ class RandomIntegerFieldBase(RandomFieldBase):
             else:
                 raise TypeError("lower_bound and upper_bound must be None when bytes is specified")
             
-        elif self.lower_bound is None or self.upper_bound is None:
-            raise TypeError("lower_bound and upper_bound must be specified when bytes is not")
+        else:
+            self.lower_bound = int(self.lower_bound)
+            self.upper_bound = int(self.upper_bound)
+            if self.upper_bound < self.lower_bound:
+                raise ValueError("upper_bound may not be less than lower_bound")
         
         self.possibilities = self.upper_bound - self.lower_bound + 1
     
     def random(self):
-        if urandom_available and self.bytes:
-            value = unpack(self.unpack_fmt, urandom(self.bytes))[0]
-        else:
-            value = random.randint(self.lower_bound, self.upper_bound)
-        return value
+        return random.randint(self.lower_bound, self.upper_bound)
     
     def formfield(self, **kwargs):
         defaults = {
@@ -47,15 +42,12 @@ class RandomIntegerFieldBase(RandomFieldBase):
 
 class RandomBigIntegerField(RandomIntegerFieldBase, models.BigIntegerField):
     bytes = 8
-    unpack_fmt = "=q"
 
 class RandomIntegerField(RandomIntegerFieldBase, models.IntegerField):
     bytes = 4
-    unpack_fmt = "=i"
 
 class RandomSmallIntegerField(RandomIntegerFieldBase, models.SmallIntegerField):
     bytes = 2
-    unpack_fmt = "=h"
 
 class RandomNarrowIntegerField(RandomIntegerFieldBase, models.IntegerField):
     """

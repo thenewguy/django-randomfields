@@ -5,8 +5,85 @@ from randomfields.models.fields import RandomFieldBase
 from randomfields.models.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \
                                         NarrowPositiveIntegerField, IntegerIdentifierValue
+from .. import random
+from . import mock
+
+def raise_not_implemented(*args, **kwargs):
+    raise NotImplementedError()
 
 class FieldTests(SimpleTestCase):
+    @mock.patch('randomfields.random.secure_random')
+    def test_random_randint(self, mocked_secure_random):
+        # verify secure_random was mocked
+        self.assertIsInstance(random.secure_random, mocked_secure_random.__class__)
+        
+        # verify secure_random.randint hasn't been called
+        self.assertEqual(mocked_secure_random.randint.call_count, 0)
+        random.randint(1, 1)
+        
+        # verify secure_random.randint was called
+        self.assertEqual(mocked_secure_random.randint.call_count, 1)
+        
+        # override secure_random.randint so that it raises a NotImplementedError
+        mocked_secure_random.randint = raise_not_implemented
+        with self.assertRaises(NotImplementedError):
+            mocked_secure_random.randint(1, 2)
+        
+        with mock.patch('randomfields.random.log_exceptions', new=True):
+            # force the exception to be logged
+            self.assertTrue(random.log_exceptions)
+            
+            with mock.patch('randomfields.random.insecure_random') as mocked_insecure_random:
+                with mock.patch('randomfields.random.logger') as mocked_logger:
+                    # mock the logger so we can verify the exception gets logged
+                    self.assertEqual(mocked_logger.exception.call_count, 0)
+                    
+                    # verify the mocked insecure_random.randint hasn't been called
+                    self.assertEqual(mocked_insecure_random.randint.call_count, 0)
+                    random.randint(1, 1)
+                    
+                    # verify exception was logged
+                    self.assertEqual(mocked_logger.exception.call_count, 1)
+                    
+                    # verify mocked_insecure_random.randint was called
+                    self.assertEqual(mocked_insecure_random.randint.call_count, 1)
+    
+    @mock.patch('randomfields.random.secure_random')
+    def test_random_coice(self, mocked_secure_random):
+        # verify secure_random was mocked
+        self.assertIsInstance(random.secure_random, mocked_secure_random.__class__)
+        
+        # verify secure_random.choice hasn't been called
+        self.assertEqual(mocked_secure_random.choice.call_count, 0)
+        random.choice("ab")
+        
+        # verify secure_random.choice was called
+        self.assertEqual(mocked_secure_random.choice.call_count, 1)
+        
+        # override secure_random.choice so that it raises a NotImplementedError
+        mocked_secure_random.choice = raise_not_implemented
+        with self.assertRaises(NotImplementedError):
+            mocked_secure_random.choice("ab")
+        
+        with mock.patch('randomfields.random.log_exceptions', new=True):
+            # force the exception to be logged
+            self.assertTrue(random.log_exceptions)
+            
+            with mock.patch('randomfields.random.insecure_random') as mocked_insecure_random:
+                with mock.patch('randomfields.random.logger') as mocked_logger:
+                    # mock the logger so we can verify the exception gets logged
+                    self.assertEqual(mocked_logger.exception.call_count, 0)
+                    
+                    # verify the mocked insecure_random.choice hasn't been called
+                    self.assertEqual(mocked_insecure_random.choice.call_count, 0)
+                    random.choice("ab")
+                    
+                    # verify exception was logged
+                    self.assertEqual(mocked_logger.exception.call_count, 1)
+                    
+                    # verify mocked_insecure_random.choice was called
+                    self.assertEqual(mocked_insecure_random.choice.call_count, 1)
+    
     def test_zero_possibilities(self):
         field = RandomFieldBase()
         with self.assertRaises(NotImplementedError):
@@ -18,23 +95,52 @@ class FieldTests(SimpleTestCase):
             field.possibilities = 12
                 
     def test_invalid_rifb_attrs(self):
-        class InvalidAttrs1(RandomIntegerFieldBase):
+        class InvalidAttrsTypeError1(RandomIntegerFieldBase):
+            # lower_bound and upper_bound must be specified when bytes is not
             bytes = None
             lower_bound = None
             upper_bound = None
-        
-        class InvalidAttrs2(RandomIntegerFieldBase):
-            bytes = 4
-            unpack_fmt = None
             
-        class InvalidAttrs3(RandomIntegerFieldBase):
+        class InvalidAttrsTypeError2(RandomIntegerFieldBase):
+            # lower_bound and upper_bound must be None when bytes is specified
             bytes = 4
-            unpack_fmt = "=i"
             lower_bound = 5
             upper_bound = 10
         
-        for cls in [InvalidAttrs1, InvalidAttrs2, InvalidAttrs3]:
+        class InvalidAttrsTypeError3(RandomIntegerFieldBase):
+            # bytes type error
+            bytes = object()
+        
+        class InvalidAttrsTypeError4(RandomIntegerFieldBase):
+            # lower_bound type error
+            lower_bound = None
+            upper_bound = 10
+        
+        class InvalidAttrsTypeError5(RandomIntegerFieldBase):
+            # upper_bound type error
+            lower_bound = 10
+            upper_bound = None
+        
+        for cls in [InvalidAttrsTypeError1, InvalidAttrsTypeError2, InvalidAttrsTypeError3, InvalidAttrsTypeError4, InvalidAttrsTypeError5]:
             with self.assertRaises(TypeError):
+                cls()
+        
+        class InvalidAttrsValueError1(RandomIntegerFieldBase):
+            # bytes value error
+            bytes = "foo"
+        
+        class InvalidAttrsValueError2(RandomIntegerFieldBase):
+            # lower_bound value error
+            lower_bound = "foo"
+            upper_bound = 10
+        
+        class InvalidAttrsValueError3(RandomIntegerFieldBase):
+            # upper_bound value error
+            lower_bound = 10
+            upper_bound = "foo"
+        
+        for cls in [InvalidAttrsValueError1, InvalidAttrsValueError2, InvalidAttrsValueError3]:
+            with self.assertRaises(ValueError):
                 cls()
         
     def test_big_integer_bounds(self):
