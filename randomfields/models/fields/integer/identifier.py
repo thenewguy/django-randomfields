@@ -26,6 +26,16 @@ class IntegerIdentifierValue(object):
         lower_bound = int(lower_bound)
         upper_bound = int(upper_bound)
         
+        # verify values are acceptable
+        if not 0 < possibilities:
+            # this is the only check performed for possibilities at the moment.
+            # we do not know the acceptable values between lower_bound and
+            # upper_bound so we cannot validate the possibility count
+            raise ValueError("possibilities must be a positive integer")
+        
+        if not lower_bound < upper_bound:
+            raise ValueError("upper_bound must be greater than lower_bound")
+        
         # for 32 bit int, possibilities is 4,294,967,296
         # because the possible unsigned values are [0, 4294967295]
         # In this case, map 0 to 4,294,967,296 and map
@@ -55,7 +65,7 @@ class IntegerIdentifierValue(object):
     def __str__(self):
         return self.display_str
 
-    def _convert_other_for_comparison(self, other):
+    def _values_for_comparison(self, other):
         value = None
         known_types = tuple(chain(string_types, integer_types, [IntegerIdentifierValue]))
         if not isinstance(other, known_types):
@@ -80,11 +90,11 @@ class IntegerIdentifierValue(object):
         return value, other
         
     def __eq__(self, other):
-        value, other = self._convert_other_for_comparison(other)
+        value, other = self._values_for_comparison(other)
         return value == other
     
     def __lt__(self, other):
-        value, other = self._convert_other_for_comparison(other)
+        value, other = self._values_for_comparison(other)
         return value < other
 
 class IntegerIdentifierBase(models.Field):

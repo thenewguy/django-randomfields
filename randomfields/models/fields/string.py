@@ -1,8 +1,8 @@
-import re
 from django.core import checks, validators
 from django.db import models
 from django.utils.six import text_type, string_types
 from django.utils.six.moves import range
+from ...forms import RandomStringField as RandomStringFormField
 from .base import RandomFieldBase, random
 
 default_valid_chars = text_type("23456789BCDFGHJKMNPQRSTVWXZ")
@@ -35,10 +35,6 @@ class RandomStringFieldBase(RandomFieldBase):
         
         super(RandomStringFieldBase, self).__init__(*args, **kwargs)
         
-        self.validators.append(validators.MaxLengthValidator(self.max_length))
-        self.validators.append(validators.MinLengthValidator(self.min_length))
-        self.validators.append(validators.RegexValidator(regex=text_type("^[%s]+$") % re.escape(self.valid_chars)))
-        
         if self.min_length == self.max_length:
             self.possibilities = len(self.valid_chars) ** self.max_length
         else:
@@ -53,6 +49,8 @@ class RandomStringFieldBase(RandomFieldBase):
         defaults = {
             'max_length': self.max_length,
             'min_length': self.min_length,
+            'valid_chars': self.valid_chars,
+            'form_class': RandomStringFormField,
         }
         defaults.update(kwargs)
         return super(RandomStringFieldBase, self).formfield(**defaults)
@@ -70,4 +68,6 @@ class RandomCharField(RandomStringFieldBase, models.CharField):
         return errors
 
 class RandomTextField(RandomStringFieldBase, models.TextField):
-    pass
+    def __init__(self, *args, **kwargs):
+        super(RandomTextField, self).__init__(*args, **kwargs)
+        self.validators.append(validators.MaxLengthValidator(self.max_length))

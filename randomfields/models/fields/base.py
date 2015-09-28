@@ -74,13 +74,13 @@ class RandomFieldBase(models.Field):
             while len(choices) < count:
                 choices.add(self.random())
             
-            results = model_cls.objects.filter(
+            unavailable_values = model_cls.objects.filter(
                 **{
                     "%s__in" % self.attname: choices
                 }
             ).values_list(self.attname, flat=True)
                                     
-            available_values = choices.difference(results)
+            available_values = choices.difference(unavailable_values)
         else:
             available_values = set([self.random()])
         
