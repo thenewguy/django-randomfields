@@ -6,8 +6,9 @@ from django.test import TestCase, SimpleTestCase
 from django.utils.six import text_type
 from randomfields.models.fields.integer import IntegerIdentifierValue
 from randomfields.models.fields import RandomCharField, RandomTextField
+from unittest import skipIf
+from ..checks import DJANGO_VERSION_17
 from . import mock
-from .checks import skipIf, DJANGO_VERSION_17
 from .models import TestIdentifierData, TestIdentifierValue, TestPrimaryKey, TestUnique, TestMinLengthPossibilities, TestFixLengthPossibilities, TestNonUniqueIntegrityError, TestUniqueNotExistIntegrityError
 
 class AppConfigTests(SimpleTestCase):

@@ -4,7 +4,7 @@ from django.utils.encoding import python_2_unicode_compatible, force_text
 from django.utils.six import text_type, integer_types, string_types
 from itertools import chain
 from functools import total_ordering
-from ....tests.checks import DJANGO_VERSION_LT_18
+from ....checks import DJANGO_VERSION_LT_18
 from .base import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField
 
 @python_2_unicode_compatible
