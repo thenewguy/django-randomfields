@@ -63,7 +63,7 @@ if version_info < (3, 3):
 
 setup(
     name = "django-randomfields",
-    version = "0.0.1",
+    version = "0.1.0",
     description = "Random fields for django models",
     cmdclass={'test': RunTestsCommand},
     packages=find_packages(),
