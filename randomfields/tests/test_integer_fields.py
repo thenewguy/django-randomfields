@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 from django.utils.six.moves import range
-from randomfields.models.fields import RandomFieldBase
+from randomfields.models.fields import RandomFieldMixin
 from randomfields.models.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \
                                         NarrowPositiveIntegerField, IntegerIdentifier
@@ -85,7 +85,7 @@ class FieldTests(SimpleTestCase):
                     self.assertEqual(mocked_insecure_random.choice.call_count, 1)
     
     def test_zero_possibilities(self):
-        field = RandomFieldBase()
+        field = RandomFieldMixin()
         with self.assertRaises(NotImplementedError):
             field.possibilities
         with self.assertRaises(ValueError):

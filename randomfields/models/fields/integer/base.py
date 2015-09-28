@@ -1,9 +1,9 @@
 from django.core import checks
 from django.db import models
 from .... import random
-from ..base import RandomFieldBase
+from ..base import RandomFieldMixin
 
-class RandomIntegerFieldBase(RandomFieldBase):
+class RandomIntegerFieldBase(RandomFieldMixin):
     bytes = None
     lower_bound = None
     upper_bound = None

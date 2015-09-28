@@ -4,10 +4,10 @@ from django.utils.six import text_type, string_types
 from django.utils.six.moves import range
 from ... import random
 from ...forms import RandomStringField as RandomStringFormField
-from .base import RandomFieldBase
+from .base import RandomFieldMixin
 
 default_valid_chars = text_type("23456789BCDFGHJKMNPQRSTVWXZ")
-class RandomStringFieldBase(RandomFieldBase):
+class RandomStringFieldBase(RandomFieldMixin):
     def __init__(self, *args, **kwargs):
         try:
             max_length = int(kwargs["max_length"])

@@ -113,8 +113,8 @@ SUPERUSER_PASSWORD = "admin"
 
 SILENCED_SYSTEM_CHECKS = [
     "randomfields.models.fields.integer.identifier.RandomIntegerIdentifierFieldMixin.Unsupported",
-    "randomfields.models.fields.base.RandomFieldBase.MaskedAttr",
+    "randomfields.models.fields.base.RandomFieldMixin.MaskedAttr",
     "randomfields.models.fields.integer.base.NarrowPositiveIntegerField.Depreciated",
-    "randomfields.models.fields.base.RandomFieldBase.InsecurePRNG",
+    "randomfields.models.fields.base.RandomFieldMixin.InsecurePRNG",
     "randomfields.models.fields.string.RandomCharField.MaxLengthGT255",
 ]

@@ -4,7 +4,7 @@ from django.db import models, IntegrityError, transaction
 from math import log, ceil
 from ...random import urandom_available
 
-class RandomFieldBase(models.Field):
+class RandomFieldMixin(models.Field):
     empty_strings_allowed = False
     logger = logging.getLogger("django.randomfields")
     urandom_available = urandom_available
@@ -23,7 +23,7 @@ class RandomFieldBase(models.Field):
         if kwargs.get('primary_key', False):
             kwargs.setdefault('editable', False)
         
-        super(RandomFieldBase, self).__init__(*args, **kwargs)
+        super(RandomFieldMixin, self).__init__(*args, **kwargs)
     
     def find_available_values(self, model_cls):
         if self.unique:
@@ -99,10 +99,10 @@ class RandomFieldBase(models.Field):
             self.set_available_value(obj)
             return getattr(obj, self.attname)
         else:
-            return super(RandomFieldBase, self).pre_save(obj, add)
+            return super(RandomFieldMixin, self).pre_save(obj, add)
     
     def contribute_to_class(self, cls, name):
-        super(RandomFieldBase, self).contribute_to_class(cls, name)
+        super(RandomFieldMixin, self).contribute_to_class(cls, name)
         cls_save = cls.save
         def save_wrapper(obj, *args, **kwargs):
             retry = self.max_retry
@@ -150,18 +150,18 @@ class RandomFieldBase(models.Field):
         self._possibilities = value
     
     def check(self, **kwargs):
-        errors = super(RandomFieldBase, self).check(**kwargs)
+        errors = super(RandomFieldMixin, self).check(**kwargs)
         instance = self.model()
         if hasattr(instance, self.available_values_attname):
             errors.append(checks.Critical(
-                'RandomFieldBase uses the attribute "%s".  The model must not have this attribute.' % self.available_values_attname,
+                'RandomFieldMixin uses the attribute "%s".  The model must not have this attribute.' % self.available_values_attname,
                 obj=self,
-                id='%s.RandomFieldBase.MaskedAttr' % __name__,
+                id='%s.RandomFieldMixin.MaskedAttr' % __name__,
             ))
         if not self.urandom_available:
             errors.append(checks.Warning(
                 '''Cryptographically secure pseudo-random number generator "os.urandom" is not available. Using Python's insecure PRNG as a fallback.''',
                 obj=self,
-                id='%s.RandomFieldBase.InsecurePRNG' % __name__,
+                id='%s.RandomFieldMixin.InsecurePRNG' % __name__,
             ))
         return errors
