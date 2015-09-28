@@ -4,11 +4,12 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from randomfields.checks import DJANGO_VERSION_17
 from randomfields.models.fields.base import RandomFieldBase
 from randomfields.models.fields import RandomCharField
 from randomfields.tests import mock
-from randomfields.tests.checks import skipIf, DJANGO_VERSION_17
 from randomfields.tests.models import TestNPIFieldChecks, TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
+from unittest import skipIf
 
 class DatabaseTest(TestCase):
     def test_superuser_exists(self):
