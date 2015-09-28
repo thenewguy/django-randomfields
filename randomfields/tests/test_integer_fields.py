@@ -5,8 +5,49 @@ from randomfields.models.fields import RandomFieldBase
 from randomfields.models.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \
                                         NarrowPositiveIntegerField, IntegerIdentifierValue
+from .. import random
+from . import mock
+
+def raise_not_implemented(*args, **kwargs):
+    raise NotImplementedError()
 
 class FieldTests(SimpleTestCase):
+    @mock.patch('randomfields.random.secure_random')
+    def test_random_randint(self, mocked_secure_random):
+        # verify secure_random was mocked
+        self.assertIsInstance(random.secure_random, mocked_secure_random.__class__)
+        
+        # verify secure_random.randint hasn't been called
+        self.assertEqual(mocked_secure_random.randint.call_count, 0)
+        random.randint(1, 1)
+        
+        # verify secure_random.randint was called
+        self.assertEqual(mocked_secure_random.randint.call_count, 1)
+        
+        # override secure_random.randint so that it raises a NotImplementedError
+        mocked_secure_random.randint = raise_not_implemented
+        with self.assertRaises(NotImplementedError):
+            mocked_secure_random.randint(1, 2)
+        
+        with mock.patch('randomfields.random.log_exceptions', new=True):
+            # force the exception to be logged
+            self.assertTrue(random.log_exceptions)
+            
+            with mock.patch('randomfields.random.insecure_random') as mocked_insecure_random:
+                with mock.patch('randomfields.random.logger') as mocked_logger:
+                    # mock the logger so we can verify the exception gets logged
+                    self.assertEqual(mocked_logger.exception.call_count, 0)
+                    
+                    # verify the mocked insecure_random.randint hasn't been called
+                    self.assertEqual(mocked_insecure_random.randint.call_count, 0)
+                    random.randint(1, 1)
+                    
+                    # verify exception was logged
+                    self.assertEqual(mocked_logger.exception.call_count, 1)
+                    
+                    # verify mocked_insecure_random.randint was called
+                    self.assertEqual(mocked_insecure_random.randint.call_count, 1)
+    
     def test_zero_possibilities(self):
         field = RandomFieldBase()
         with self.assertRaises(NotImplementedError):
