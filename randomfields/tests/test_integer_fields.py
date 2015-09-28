@@ -18,32 +18,53 @@ class FieldTests(SimpleTestCase):
             field.possibilities = 12
                 
     def test_invalid_rifb_attrs(self):
-        class InvalidAttrs1(RandomIntegerFieldBase):
+        class InvalidAttrsTypeError1(RandomIntegerFieldBase):
             # lower_bound and upper_bound must be specified when bytes is not
             bytes = None
             lower_bound = None
             upper_bound = None
             
-        class InvalidAttrs2(RandomIntegerFieldBase):
+        class InvalidAttrsTypeError2(RandomIntegerFieldBase):
             # lower_bound and upper_bound must be None when bytes is specified
             bytes = 4
             lower_bound = 5
             upper_bound = 10
         
-        class InvalidAttrs3(RandomIntegerFieldBase):
+        class InvalidAttrsTypeError3(RandomIntegerFieldBase):
             # bytes type error
             bytes = object()
         
-        class InvalidAttrs4(RandomIntegerFieldBase):
-            # bytes value error
-            bytes = "foo"
+        class InvalidAttrsTypeError4(RandomIntegerFieldBase):
+            # lower_bound type error
+            lower_bound = None
+            upper_bound = 10
         
-        for cls in [InvalidAttrs1, InvalidAttrs2, InvalidAttrs3]:
+        class InvalidAttrsTypeError5(RandomIntegerFieldBase):
+            # upper_bound type error
+            lower_bound = 10
+            upper_bound = None
+        
+        for cls in [InvalidAttrsTypeError1, InvalidAttrsTypeError2, InvalidAttrsTypeError3, InvalidAttrsTypeError4, InvalidAttrsTypeError5]:
             with self.assertRaises(TypeError):
                 cls()
         
-        with self.assertRaises(ValueError):
-            InvalidAttrs4()
+        class InvalidAttrsValueError1(RandomIntegerFieldBase):
+            # bytes value error
+            bytes = "foo"
+        
+        class InvalidAttrsValueError2(RandomIntegerFieldBase):
+            # lower_bound value error
+            lower_bound = "foo"
+            upper_bound = 10
+        
+        class InvalidAttrsValueError3(RandomIntegerFieldBase):
+            # upper_bound value error
+            lower_bound = 10
+            upper_bound = "foo"
+        
+        for cls in [InvalidAttrsValueError1, InvalidAttrsValueError2, InvalidAttrsValueError3]:
+            with self.assertRaises(ValueError):
+                cls()
         
     def test_big_integer_bounds(self):
         field = RandomBigIntegerField()

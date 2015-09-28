@@ -21,8 +21,11 @@ class RandomIntegerFieldBase(RandomFieldBase):
             else:
                 raise TypeError("lower_bound and upper_bound must be None when bytes is specified")
             
-        elif self.lower_bound is None or self.upper_bound is None:
-            raise TypeError("lower_bound and upper_bound must be specified when bytes is not")
+        else:
+            self.lower_bound = int(self.lower_bound)
+            self.upper_bound = int(self.upper_bound)
+            if self.upper_bound < self.lower_bound:
+                raise ValueError("upper_bound may not be less than lower_bound")
         
         self.possibilities = self.upper_bound - self.lower_bound + 1
     
