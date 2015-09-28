@@ -5,8 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from randomfields.checks import DJANGO_VERSION_17
-from randomfields.models.fields.base import RandomFieldMixin
-from randomfields.models.fields import RandomCharField
+from randomfields.models.fields import RandomCharField, RandomBigIntegerField
 from randomfields.tests import mock
 from randomfields.tests.models import TestNPIFieldChecks, TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 from unittest import skipIf
@@ -41,7 +40,7 @@ class AppTestConfigTests(TestCase):
     
     @mock.patch('randomfields.models.fields.base.RandomFieldMixin.urandom_available', new=False)
     def test_insecure_prng_warning(self):
-        field = RandomFieldMixin(name="foo")
+        field = RandomBigIntegerField(name="foo")
         field.attname = "bar"
         field.model = TestNPIFieldChecks
         self.assertFalse(field.urandom_available)

@@ -1,10 +1,10 @@
 import logging
 from django.core import checks
-from django.db import models, IntegrityError, transaction
+from django.db import IntegrityError, transaction
 from math import log, ceil
 from ...random import urandom_available
 
-class RandomFieldMixin(models.Field):
+class RandomFieldMixin(object):
     empty_strings_allowed = False
     logger = logging.getLogger("django.randomfields")
     urandom_available = urandom_available

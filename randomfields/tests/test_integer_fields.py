@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.test import SimpleTestCase
 from django.utils.six.moves import range
 from randomfields.models.fields import RandomFieldMixin
@@ -85,7 +86,9 @@ class FieldTests(SimpleTestCase):
                     self.assertEqual(mocked_insecure_random.choice.call_count, 1)
     
     def test_zero_possibilities(self):
-        field = RandomFieldMixin()
+        class LocalTestField(RandomFieldMixin, models.Field):
+            pass
+        field = LocalTestField()
         with self.assertRaises(NotImplementedError):
             field.possibilities
         with self.assertRaises(ValueError):
@@ -95,28 +98,31 @@ class FieldTests(SimpleTestCase):
             field.possibilities = 12
                 
     def test_invalid_rifb_attrs(self):
-        class InvalidAttrsTypeError1(RandomIntegerFieldBase):
+        class LocalTestField(RandomIntegerFieldBase, models.Field):
+            pass
+        
+        class InvalidAttrsTypeError1(LocalTestField):
             # lower_bound and upper_bound must be specified when bytes is not
             bytes = None
             lower_bound = None
             upper_bound = None
             
-        class InvalidAttrsTypeError2(RandomIntegerFieldBase):
+        class InvalidAttrsTypeError2(LocalTestField):
             # lower_bound and upper_bound must be None when bytes is specified
             bytes = 4
             lower_bound = 5
             upper_bound = 10
         
-        class InvalidAttrsTypeError3(RandomIntegerFieldBase):
+        class InvalidAttrsTypeError3(LocalTestField):
             # bytes type error
             bytes = object()
         
-        class InvalidAttrsTypeError4(RandomIntegerFieldBase):
+        class InvalidAttrsTypeError4(LocalTestField):
             # lower_bound type error
             lower_bound = None
             upper_bound = 10
         
-        class InvalidAttrsTypeError5(RandomIntegerFieldBase):
+        class InvalidAttrsTypeError5(LocalTestField):
             # upper_bound type error
             lower_bound = 10
             upper_bound = None
@@ -125,16 +131,16 @@ class FieldTests(SimpleTestCase):
             with self.assertRaises(TypeError):
                 cls()
         
-        class InvalidAttrsValueError1(RandomIntegerFieldBase):
+        class InvalidAttrsValueError1(LocalTestField):
             # bytes value error
             bytes = "foo"
         
-        class InvalidAttrsValueError2(RandomIntegerFieldBase):
+        class InvalidAttrsValueError2(LocalTestField):
             # lower_bound value error
             lower_bound = "foo"
             upper_bound = 10
         
-        class InvalidAttrsValueError3(RandomIntegerFieldBase):
+        class InvalidAttrsValueError3(LocalTestField):
             # upper_bound value error
             lower_bound = 10
             upper_bound = "foo"
