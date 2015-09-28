@@ -30,9 +30,20 @@ class FieldTests(SimpleTestCase):
             lower_bound = 5
             upper_bound = 10
         
-        for cls in [InvalidAttrs1, InvalidAttrs2]:
+        class InvalidAttrs3(RandomIntegerFieldBase):
+            # bytes type error
+            bytes = object()
+        
+        class InvalidAttrs4(RandomIntegerFieldBase):
+            # bytes value error
+            bytes = "foo"
+        
+        for cls in [InvalidAttrs1, InvalidAttrs2, InvalidAttrs3]:
             with self.assertRaises(TypeError):
                 cls()
+        
+        with self.assertRaises(ValueError):
+            InvalidAttrs4()
         
     def test_big_integer_bounds(self):
         field = RandomBigIntegerField()

@@ -11,7 +11,9 @@ class RandomIntegerFieldBase(RandomFieldBase):
     def __init__(self, *args, **kwargs):
         super(RandomIntegerFieldBase, self).__init__(*args, **kwargs)
         
-        if self.bytes:
+        if self.bytes is not None:
+            self.bytes = int(self.bytes)
+            
             if self.lower_bound is None and self.upper_bound is None:
                 bit_exp = self.bytes * 8 - 1
                 self.lower_bound = -(2 ** bit_exp)
