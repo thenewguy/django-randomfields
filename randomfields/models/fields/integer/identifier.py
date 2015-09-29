@@ -1,5 +1,4 @@
 from django.core import checks
-from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, force_text
 from django.utils.six import text_type, integer_types, string_types
 from itertools import chain
