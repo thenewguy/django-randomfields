@@ -3,7 +3,7 @@ from django.db import models
 from django.test import SimpleTestCase
 from django.utils.six.moves import range
 from randomfields.models.fields import RandomFieldMixin
-from randomfields.models.fields.integer import RandomIntegerFieldBase, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
+from randomfields.models.fields.integer import RandomIntegerFieldMixin, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \
                                         NarrowPositiveIntegerField, IntegerIdentifier
 from .. import random
@@ -98,7 +98,7 @@ class FieldTests(SimpleTestCase):
             field.possibilities = 12
                 
     def test_invalid_rifb_attrs(self):
-        class LocalTestField(RandomIntegerFieldBase, models.Field):
+        class LocalTestField(RandomIntegerFieldMixin, models.Field):
             pass
         
         class InvalidAttrsTypeError1(LocalTestField):

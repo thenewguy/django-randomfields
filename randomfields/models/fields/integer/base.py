@@ -3,13 +3,13 @@ from django.db import models
 from .... import random
 from ..base import RandomFieldMixin
 
-class RandomIntegerFieldBase(RandomFieldMixin):
+class RandomIntegerFieldMixin(RandomFieldMixin):
     bytes = None
     lower_bound = None
     upper_bound = None
     
     def __init__(self, *args, **kwargs):
-        super(RandomIntegerFieldBase, self).__init__(*args, **kwargs)
+        super(RandomIntegerFieldMixin, self).__init__(*args, **kwargs)
         
         if self.bytes is not None:
             self.bytes = int(self.bytes)
@@ -38,18 +38,18 @@ class RandomIntegerFieldBase(RandomFieldMixin):
             'max_value': self.upper_bound,
         }
         defaults.update(kwargs)
-        return super(RandomIntegerFieldBase, self).formfield(**defaults)
+        return super(RandomIntegerFieldMixin, self).formfield(**defaults)
 
-class RandomBigIntegerField(RandomIntegerFieldBase, models.BigIntegerField):
+class RandomBigIntegerField(RandomIntegerFieldMixin, models.BigIntegerField):
     bytes = 8
 
-class RandomIntegerField(RandomIntegerFieldBase, models.IntegerField):
+class RandomIntegerField(RandomIntegerFieldMixin, models.IntegerField):
     bytes = 4
 
-class RandomSmallIntegerField(RandomIntegerFieldBase, models.SmallIntegerField):
+class RandomSmallIntegerField(RandomIntegerFieldMixin, models.SmallIntegerField):
     bytes = 2
 
-class RandomNarrowIntegerField(RandomIntegerFieldBase, models.IntegerField):
+class RandomNarrowIntegerField(RandomIntegerFieldMixin, models.IntegerField):
     """
         This field is a drop in replacement for AutoField primary keys.
         It returns a random integer between 1,000,000,000 and 2,147,483,647.
