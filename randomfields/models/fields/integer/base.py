@@ -4,28 +4,16 @@ from .... import random
 from ..base import RandomFieldMixin
 
 class RandomIntegerFieldMixin(RandomFieldMixin):
-    bytes = None
     lower_bound = None
     upper_bound = None
     
     def __init__(self, *args, **kwargs):
         super(RandomIntegerFieldMixin, self).__init__(*args, **kwargs)
         
-        if self.bytes is not None:
-            self.bytes = int(self.bytes)
-            
-            if self.lower_bound is None and self.upper_bound is None:
-                bit_exp = self.bytes * 8 - 1
-                self.lower_bound = -(2 ** bit_exp)
-                self.upper_bound = 2 ** bit_exp - 1
-            else:
-                raise TypeError("lower_bound and upper_bound must be None when bytes is specified")
-            
-        else:
-            self.lower_bound = int(self.lower_bound)
-            self.upper_bound = int(self.upper_bound)
-            if self.upper_bound < self.lower_bound:
-                raise ValueError("upper_bound may not be less than lower_bound")
+        self.lower_bound = int(self.lower_bound)
+        self.upper_bound = int(self.upper_bound)
+        if self.upper_bound < self.lower_bound:
+            raise ValueError("upper_bound may not be less than lower_bound")
         
         self.possibilities = self.upper_bound - self.lower_bound + 1
     
@@ -41,13 +29,19 @@ class RandomIntegerFieldMixin(RandomFieldMixin):
         return super(RandomIntegerFieldMixin, self).formfield(**defaults)
 
 class RandomBigIntegerField(RandomIntegerFieldMixin, models.BigIntegerField):
-    bytes = 8
+    # 8 byte / 64 bit Integer
+    lower_bound = -9223372036854775808
+    upper_bound = 9223372036854775807
 
 class RandomIntegerField(RandomIntegerFieldMixin, models.IntegerField):
-    bytes = 4
+    # 4 byte / 32 bit Integer
+    lower_bound = -2147483648
+    upper_bound = 2147483647
 
 class RandomSmallIntegerField(RandomIntegerFieldMixin, models.SmallIntegerField):
-    bytes = 2
+    # 2 byte / 16 bit Integer
+    lower_bound = -32768
+    upper_bound = 32767
 
 class RandomNarrowIntegerField(RandomIntegerFieldMixin, models.IntegerField):
     """

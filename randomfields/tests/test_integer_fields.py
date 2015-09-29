@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.test import SimpleTestCase
+from django.utils.six import integer_types
 from django.utils.six.moves import range
 from randomfields.models.fields import RandomFieldMixin
 from randomfields.models.fields.integer import RandomIntegerFieldMixin, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
@@ -97,72 +98,57 @@ class FieldTests(SimpleTestCase):
         with self.assertRaises(NotImplementedError):
             field.possibilities = 12
                 
-    def test_invalid_rifb_attrs(self):
+    def test_invalid_rifm_attrs(self):
         class LocalTestField(RandomIntegerFieldMixin, models.Field):
             pass
         
-        class InvalidAttrsTypeError1(LocalTestField):
-            # lower_bound and upper_bound must be specified when bytes is not
-            bytes = None
-            lower_bound = None
-            upper_bound = None
-            
-        class InvalidAttrsTypeError2(LocalTestField):
-            # lower_bound and upper_bound must be None when bytes is specified
-            bytes = 4
+        class NoException(LocalTestField):
             lower_bound = 5
             upper_bound = 10
         
-        class InvalidAttrsTypeError3(LocalTestField):
-            # bytes type error
-            bytes = object()
+        # no exception
+        NoException()
         
-        class InvalidAttrsTypeError4(LocalTestField):
-            # lower_bound type error
+        class LowerTypeError(LocalTestField):
             lower_bound = None
             upper_bound = 10
         
-        class InvalidAttrsTypeError5(LocalTestField):
-            # upper_bound type error
+        class UpperTypeError(LocalTestField):
             lower_bound = 10
             upper_bound = None
         
-        for cls in [InvalidAttrsTypeError1, InvalidAttrsTypeError2, InvalidAttrsTypeError3, InvalidAttrsTypeError4, InvalidAttrsTypeError5]:
+        for cls in [LowerTypeError, UpperTypeError]:
             with self.assertRaises(TypeError):
                 cls()
         
-        class InvalidAttrsValueError1(LocalTestField):
-            # bytes value error
-            bytes = "foo"
-        
-        class InvalidAttrsValueError2(LocalTestField):
-            # lower_bound value error
+        class LowerValueError(LocalTestField):
             lower_bound = "foo"
             upper_bound = 10
         
-        class InvalidAttrsValueError3(LocalTestField):
-            # upper_bound value error
+        class UpperValueError(LocalTestField):
             lower_bound = 10
             upper_bound = "foo"
         
-        for cls in [InvalidAttrsValueError1, InvalidAttrsValueError2, InvalidAttrsValueError3]:
+        for cls in [LowerValueError, UpperValueError]:
             with self.assertRaises(ValueError):
                 cls()
-        
+    
+    def _test_integer_bounds_by_bytes(self, field, n_bytes):
+        self.assertIsInstance(n_bytes, integer_types)
+        bit_exp = n_bytes * 8 - 1
+        lower_bound = -(2 ** bit_exp)
+        upper_bound = 2 ** bit_exp - 1
+        self.assertEqual(field.lower_bound, lower_bound)
+        self.assertEqual(field.upper_bound, upper_bound)
+    
     def test_big_integer_bounds(self):
-        field = RandomBigIntegerField()
-        self.assertEqual(field.lower_bound, -9223372036854775808)
-        self.assertEqual(field.upper_bound, 9223372036854775807)
+        self._test_integer_bounds_by_bytes(RandomBigIntegerField(), 8)
     
     def test_integer_bounds(self):
-        field = RandomIntegerField()
-        self.assertEqual(field.lower_bound, -2147483648)
-        self.assertEqual(field.upper_bound, 2147483647)
+        self._test_integer_bounds_by_bytes(RandomIntegerField(), 4)
     
     def test_small_integer_bounds(self):
-        field = RandomSmallIntegerField()
-        self.assertEqual(field.lower_bound, -32768)
-        self.assertEqual(field.upper_bound, 32767)
+        self._test_integer_bounds_by_bytes(RandomSmallIntegerField(), 2)
     
     def test_integer_formfield_bounds(self):
         for field_cls in [RandomIntegerField, RandomBigIntegerField, RandomSmallIntegerField, NarrowPositiveIntegerField]:
@@ -183,20 +169,10 @@ class FieldTests(SimpleTestCase):
     def test_integer_random(self):
         for field_cls in [RandomIntegerField, RandomBigIntegerField, RandomSmallIntegerField]:
             field = field_cls()
-            bytes_ = field.bytes
             for _ in range(10):
                 val1 = field.random()
                 self.assertGreaterEqual(val1, field.lower_bound)
                 self.assertLessEqual(val1, field.upper_bound)
-                
-                # force random method to use randint instead of unpack/urandom
-                field.bytes = None
-                val2 = field.random()
-                self.assertGreaterEqual(val2, field.lower_bound)
-                self.assertLessEqual(val2, field.upper_bound)
-                
-                # reset
-                field.bytes = bytes_
     
     def _test_integer_identifier_conversions(self, field_cls, value_map):
         field = field_cls()
