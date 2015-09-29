@@ -4,7 +4,7 @@ from django.db import IntegrityError, transaction
 from django.forms.models import model_to_dict
 from django.test import TestCase, SimpleTestCase
 from django.utils.six import text_type
-from randomfields.models.fields.integer import IntegerIdentifierValue
+from randomfields.models.fields.integer import IntegerIdentifier
 from randomfields.models.fields import RandomCharField, RandomTextField
 from unittest import skipIf
 from ..checks import DJANGO_VERSION_17
@@ -37,7 +37,7 @@ class SaveTests(TestCase):
             
             for obj in (obj1, obj2):
                 value = getattr(obj, attr)
-                self.assertTrue(isinstance(value, IntegerIdentifierValue), "Object attribute '%s' was not an instance of IntegerIdentifierValue.  It was type %r" % (attr, type(value)))
+                self.assertTrue(isinstance(value, IntegerIdentifier), "Object attribute '%s' was not an instance of IntegerIdentifier.  It was type %r" % (attr, type(value)))
                 self.assertEqual(value.display_value, display_value)
                 self.assertEqual(value.db_value, db_value)
                 
@@ -68,8 +68,8 @@ class SaveTests(TestCase):
     
     def test_identifier_pk_type_on_create(self):
         obj = TestIdentifierValue.objects.create()
-        self.assertIsInstance(obj.id, IntegerIdentifierValue)
-        self.assertIsInstance(obj.pk, IntegerIdentifierValue)
+        self.assertIsInstance(obj.id, IntegerIdentifier)
+        self.assertIsInstance(obj.pk, IntegerIdentifier)
             
     def test_auto_primary_key(self):
         obj = TestPrimaryKey()
@@ -146,7 +146,7 @@ class SaveTests(TestCase):
         self.assertEqual(val1, obj1.unique_field)
         self.assertFalse(hasattr(obj1, field1.available_values_attname))
     
-    @mock.patch('randomfields.models.fields.RandomFieldBase.logger')
+    @mock.patch('randomfields.models.fields.RandomFieldMixin.logger')
     def test_warn_at_percent(self, mocked_logger):
         obj1 = TestMinLengthPossibilities()
         self.assertEqual(obj1._meta.get_field("data").valid_chars, "ab")

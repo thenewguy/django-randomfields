@@ -5,8 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from randomfields.checks import DJANGO_VERSION_17
-from randomfields.models.fields.base import RandomFieldBase
-from randomfields.models.fields import RandomCharField
+from randomfields.models.fields import RandomCharField, RandomBigIntegerField
 from randomfields.tests import mock
 from randomfields.tests.models import TestNPIFieldChecks, TestMaskedAttrDetection, TestIdentifierM2MO2OPKValue, TestIdentifierM2MFKValue, TestIdentifierValue, TestIdentifierO2OValue, TestIdentifierFKValue, TestIdentifierM2MValue, TestIdentifierAllValue, TestIdentifierM2MO2OValue
 from unittest import skipIf
@@ -31,21 +30,21 @@ class AppTestConfigTests(TestCase):
             self.assertNotIn(key, ids)
     
     def test_unsupported_fields(self):
-        self._test_system_check(TestIdentifierValue, "randomfields.models.fields.integer.identifier.IntegerIdentifierBase.Unsupported", DJANGO_VERSION_17)
+        self._test_system_check(TestIdentifierValue, "randomfields.models.fields.integer.identifier.RandomIntegerIdentifierFieldMixin.Unsupported", DJANGO_VERSION_17)
 
     def test_masked_attrs(self):
-        self._test_system_check(TestMaskedAttrDetection, "randomfields.models.fields.base.RandomFieldBase.MaskedAttr")
+        self._test_system_check(TestMaskedAttrDetection, "randomfields.models.fields.base.RandomFieldMixin.MaskedAttr")
     
     def test_narrow_positive_integer_field_depreciated(self):
         self._test_system_check(TestNPIFieldChecks, "randomfields.models.fields.integer.base.NarrowPositiveIntegerField.Depreciated")
     
-    @mock.patch('randomfields.models.fields.base.RandomFieldBase.urandom_available', new=False)
+    @mock.patch('randomfields.models.fields.base.RandomFieldMixin.urandom_available', new=False)
     def test_insecure_prng_warning(self):
-        field = RandomFieldBase(name="foo")
+        field = RandomBigIntegerField(name="foo")
         field.attname = "bar"
         field.model = TestNPIFieldChecks
         self.assertFalse(field.urandom_available)
-        self._test_system_check(field, "randomfields.models.fields.base.RandomFieldBase.InsecurePRNG")
+        self._test_system_check(field, "randomfields.models.fields.base.RandomFieldMixin.InsecurePRNG")
     
     def test_charfield_max_length_warning(self):
         field = RandomCharField(name="foo", max_length=256)

@@ -1,5 +1,4 @@
 from django.core import checks
-from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, force_text
 from django.utils.six import text_type, integer_types, string_types
 from itertools import chain
@@ -9,7 +8,7 @@ from .base import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerF
 
 @python_2_unicode_compatible
 @total_ordering
-class IntegerIdentifierValue(object):
+class IntegerIdentifier(object):
     db_value = None
     display_value = None
     display_str = None
@@ -18,7 +17,7 @@ class IntegerIdentifierValue(object):
     possibilities = None
     
     def __init__(self, value, possibilities, lower_bound, upper_bound):
-        super(IntegerIdentifierValue, self).__init__()
+        super(IntegerIdentifier, self).__init__()
         
         # verify types are acceptable
         value = int(value)
@@ -67,7 +66,7 @@ class IntegerIdentifierValue(object):
 
     def _values_for_comparison(self, other):
         value = None
-        known_types = tuple(chain(string_types, integer_types, [IntegerIdentifierValue]))
+        known_types = tuple(chain(string_types, integer_types, [IntegerIdentifier]))
         if not isinstance(other, known_types):
             try:
                 other = int(other)
@@ -77,8 +76,8 @@ class IntegerIdentifierValue(object):
                 except (TypeError, ValueError):
                     pass
         if isinstance(other, integer_types):
-            other = IntegerIdentifierValue(other, self.possibilities, self.lower_bound, self.upper_bound)
-        if isinstance(other, IntegerIdentifierValue):
+            other = IntegerIdentifier(other, self.possibilities, self.lower_bound, self.upper_bound)
+        if isinstance(other, IntegerIdentifier):
             value = int(self)
             other = int(other)
         if isinstance(other, string_types):
@@ -98,12 +97,12 @@ class IntegerIdentifierValue(object):
         return value < other
     
     def __hash__(self):
-        return hash(text_type("{};{}").format(int(self), text_type(self)))
+        return hash(text_type("{};{}").format(int(self), self))
 
-class IntegerIdentifierBase(models.Field):
+class RandomIntegerIdentifierFieldMixin(object):
     def to_python(self, value):
-        if value is not None and not isinstance(value, IntegerIdentifierValue):
-            value = IntegerIdentifierValue(value, self.possibilities, self.lower_bound, self.upper_bound)
+        if value is not None and not isinstance(value, IntegerIdentifier):
+            value = IntegerIdentifier(value, self.possibilities, self.lower_bound, self.upper_bound)
         return value
     
     def get_prep_value(self, value):
@@ -112,58 +111,42 @@ class IntegerIdentifierBase(models.Field):
         return value
     
     def get_db_prep_value(self, *args, **kwargs):
-        value = super(IntegerIdentifierBase, self).get_db_prep_value(*args, **kwargs)
-        if isinstance(value, IntegerIdentifierValue):
+        value = super(RandomIntegerIdentifierFieldMixin, self).get_db_prep_value(*args, **kwargs)
+        if isinstance(value, IntegerIdentifier):
             value = int(value)
         return value
     
     def from_db_value(self, value, *args):
         return self.to_python(value)
     
-    def contribute_to_class(self, cls, name):
-        super(IntegerIdentifierBase, self).contribute_to_class(cls, name)
-        cls_save = cls.save
-        def save_wrapper(obj, *args, **kwargs):
-            cls_save(obj, *args, **kwargs)
-            #
-            # HACK
-            #    Model.objects.create() doesn't convert the value to_python
-            #    so instances created in this fashion have the int db_value
-            #    instead of an IntegerIdentifierValue. An obvious symptom
-            #    is the admin redirect on create uses the incorrect value.
-            #    While it still works due to the approach of 
-            #    IntegerIdentifierValue, the redirect uses the db value
-            #    instead of the display value.
-            #
-            value = getattr(obj, self.attname)
-            value = self.to_python(value)
-            setattr(obj, self.attname, value)
-        cls.save = save_wrapper
+    def random(self):
+        value = super(RandomIntegerIdentifierFieldMixin, self).random()
+        return IntegerIdentifier(value, self.possibilities, self.lower_bound, self.upper_bound)
     
     def formfield(self, **kwargs):
         defaults = {
-            'min_value': IntegerIdentifierValue(self.lower_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
-            'max_value': IntegerIdentifierValue(self.upper_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
+            'min_value': IntegerIdentifier(self.lower_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
+            'max_value': IntegerIdentifier(self.upper_bound, self.possibilities, self.lower_bound, self.upper_bound).display_value,
         }
         defaults.update(kwargs)
-        return super(IntegerIdentifierBase, self).formfield(**defaults)
+        return super(RandomIntegerIdentifierFieldMixin, self).formfield(**defaults)
     
     def check(self, **kwargs):
-        errors = super(IntegerIdentifierBase, self).check(**kwargs)
+        errors = super(RandomIntegerIdentifierFieldMixin, self).check(**kwargs)
         if DJANGO_VERSION_LT_18:
             errors.append(checks.Critical(
                 'IntegerIdentifier fields are not supported on Django versions less than 1.8.',
                 hint='Use RandomNarrowIntegerField instead.',
                 obj=self,
-                id='%s.IntegerIdentifierBase.Unsupported' % __name__,
+                id='%s.RandomIntegerIdentifierFieldMixin.Unsupported' % __name__,
             ))
         return errors
 
-class RandomBigIntegerIdentifierField(IntegerIdentifierBase, RandomBigIntegerField):
+class RandomBigIntegerIdentifierField(RandomIntegerIdentifierFieldMixin, RandomBigIntegerField):
     pass
 
-class RandomIntegerIdentifierField(IntegerIdentifierBase, RandomIntegerField):
+class RandomIntegerIdentifierField(RandomIntegerIdentifierFieldMixin, RandomIntegerField):
     pass
 
-class RandomSmallIntegerIdentifierField(IntegerIdentifierBase, RandomSmallIntegerField):
+class RandomSmallIntegerIdentifierField(RandomIntegerIdentifierFieldMixin, RandomSmallIntegerField):
     pass

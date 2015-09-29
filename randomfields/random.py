@@ -14,7 +14,7 @@ except NotImplementedError:
 else:
     urandom_available = True
 
-log_exceptions = urandom_available or "randomfields.models.fields.base.RandomFieldBase.InsecurePRNG" not in settings.SILENCED_SYSTEM_CHECKS
+log_exceptions = urandom_available or "randomfields.models.fields.base.RandomFieldMixin.InsecurePRNG" not in settings.SILENCED_SYSTEM_CHECKS
 
 def randint(*args):
     try:
