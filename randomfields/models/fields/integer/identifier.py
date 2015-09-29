@@ -97,7 +97,7 @@ class IntegerIdentifier(object):
         return value < other
     
     def __hash__(self):
-        return hash(text_type("{};{}").format(int(self), text_type(self)))
+        return hash(text_type("{};{}").format(int(self), self))
 
 class RandomIntegerIdentifierFieldMixin(object):
     def to_python(self, value):
