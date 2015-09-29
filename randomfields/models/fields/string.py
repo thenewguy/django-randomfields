@@ -7,7 +7,7 @@ from ...forms import RandomStringField as RandomStringFormField
 from .base import RandomFieldMixin
 
 default_valid_chars = text_type("23456789BCDFGHJKMNPQRSTVWXZ")
-class RandomStringFieldBase(RandomFieldMixin):
+class RandomStringFieldMixin(RandomFieldMixin):
     def __init__(self, *args, **kwargs):
         try:
             max_length = int(kwargs["max_length"])
@@ -34,7 +34,7 @@ class RandomStringFieldBase(RandomFieldMixin):
             raise TypeError("valid_chars must be of string type")
         self.valid_chars = text_type(valid_chars) 
         
-        super(RandomStringFieldBase, self).__init__(*args, **kwargs)
+        super(RandomStringFieldMixin, self).__init__(*args, **kwargs)
         
         if self.min_length == self.max_length:
             self.possibilities = len(self.valid_chars) ** self.max_length
@@ -54,9 +54,9 @@ class RandomStringFieldBase(RandomFieldMixin):
             'form_class': RandomStringFormField,
         }
         defaults.update(kwargs)
-        return super(RandomStringFieldBase, self).formfield(**defaults)
+        return super(RandomStringFieldMixin, self).formfield(**defaults)
 
-class RandomCharField(RandomStringFieldBase, models.CharField):
+class RandomCharField(RandomStringFieldMixin, models.CharField):
     def check(self, **kwargs):
         errors = super(RandomCharField, self).check(**kwargs)
         if 255 < self.max_length:
@@ -68,7 +68,7 @@ class RandomCharField(RandomStringFieldBase, models.CharField):
             ))
         return errors
 
-class RandomTextField(RandomStringFieldBase, models.TextField):
+class RandomTextField(RandomStringFieldMixin, models.TextField):
     def __init__(self, *args, **kwargs):
         super(RandomTextField, self).__init__(*args, **kwargs)
         self.validators.append(validators.MaxLengthValidator(self.max_length))
