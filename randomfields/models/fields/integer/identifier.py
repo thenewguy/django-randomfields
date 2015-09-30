@@ -1,14 +1,13 @@
 from django.core import checks
-from django.utils.encoding import python_2_unicode_compatible, force_text
+from django.utils.encoding import force_text
 from django.utils.six import text_type, integer_types, string_types
 from itertools import chain
 from functools import total_ordering
 from ....checks import DJANGO_VERSION_LT_18
 from .base import RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField
 
-@python_2_unicode_compatible
 @total_ordering
-class IntegerIdentifier(object):
+class IntegerIdentifier(text_type):
     db_value = None
     display_value = None
     display_str = None
@@ -16,9 +15,7 @@ class IntegerIdentifier(object):
     upper_bound = None
     possibilities = None
     
-    def __init__(self, value, possibilities, lower_bound, upper_bound):
-        super(IntegerIdentifier, self).__init__()
-        
+    def __new__(cls, value, possibilities, lower_bound, upper_bound):
         # verify types are acceptable
         value = int(value)
         possibilities = int(possibilities)
@@ -51,18 +48,18 @@ class IntegerIdentifier(object):
         
         display_str = text_type(display_value).zfill(length)
         
+        self = super(IntegerIdentifier, cls).__new__(cls, display_str)
         self.db_value = db_value
         self.display_value = display_value
         self.display_str = display_str
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
         self.possibilities = possibilities
+        
+        return self
     
     def __int__(self):
         return self.db_value
-    
-    def __str__(self):
-        return self.display_str
 
     def _values_for_comparison(self, other):
         value = None
