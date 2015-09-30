@@ -1,7 +1,8 @@
+import json
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.test import SimpleTestCase
-from django.utils.six import integer_types
+from django.utils.six import integer_types, string_types
 from django.utils.six.moves import range
 from randomfields.models.fields import RandomFieldMixin
 from randomfields.models.fields.integer import RandomIntegerFieldMixin, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
@@ -14,6 +15,21 @@ def raise_not_implemented(*args, **kwargs):
     raise NotImplementedError()
 
 class FieldTests(SimpleTestCase):
+    def test_json_serializable(self):
+        value = IntegerIdentifier(1, 3, -1, 1)
+        
+        # should not raise an exception about unknown object type
+        serialized = json.dumps([value])
+        
+        deserialized = json.loads(serialized)[0]
+        self.assertIsInstance(deserialized, string_types)
+        self.assertNotIsInstance(deserialized, IntegerIdentifier)
+        self.assertEqual(deserialized, value.display_str)
+    
+    def test_integer_identifier_isinstance(self):
+        value = IntegerIdentifier(1, 3, -1, 1)
+        self.assertIsInstance(value, IntegerIdentifier)
+    
     @mock.patch('randomfields.random.secure_random')
     def test_random_randint(self, mocked_secure_random):
         # verify secure_random was mocked
