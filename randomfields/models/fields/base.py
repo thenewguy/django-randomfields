@@ -1,6 +1,7 @@
 import logging
 from django.core import checks
 from django.db import IntegrityError, transaction
+from django.db.utils import OperationalError
 from math import log, ceil
 from ...random import urandom_available
 
@@ -151,13 +152,29 @@ class RandomFieldMixin(object):
     
     def check(self, **kwargs):
         errors = super(RandomFieldMixin, self).check(**kwargs)
-        instance = self.model()
-        if hasattr(instance, self.available_values_attname):
-            errors.append(checks.Critical(
-                'RandomFieldMixin uses the attribute "%s".  The model must not have this attribute.' % self.available_values_attname,
+        
+        try:
+            instance = self.model()
+        except OperationalError as e:
+            errors.append(checks.Warning(
+                (
+                 "Encountered database operational error while attempting to create an instance of model '%s'. "
+                 "This can occur for a number of reasons. One such reason is the model in question sets a default "
+                 "value that queries the database and migrations have not yet been run for the model. If you "
+                 "continue to see this warning, something is wrong. Otherwise it can be ignored. "
+                 "The actual error is as follows:\n\n\t%s\n"
+                ) % (self.model, e),
                 obj=self,
-                id='%s.RandomFieldMixin.MaskedAttr' % __name__,
+                id='%s.RandomFieldMixin.InstanceDatabaseOperationalError' % __name__,
             ))
+        else:
+            if hasattr(instance, self.available_values_attname):
+                errors.append(checks.Critical(
+                    'RandomFieldMixin uses the attribute "%s".  The model must not have this attribute.' % self.available_values_attname,
+                    obj=self,
+                    id='%s.RandomFieldMixin.MaskedAttr' % __name__,
+                ))
+        
         if not self.urandom_available:
             errors.append(checks.Warning(
                 '''Cryptographically secure pseudo-random number generator "os.urandom" is not available. Using Python's insecure PRNG as a fallback.''',
