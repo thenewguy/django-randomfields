@@ -1,7 +1,7 @@
 import logging
 from django.core import checks
 from django.db import IntegrityError, transaction
-from django.db.utils import OperationalError
+from django.db.utils import DatabaseError
 from math import log, ceil
 from ...random import urandom_available
 
@@ -155,17 +155,17 @@ class RandomFieldMixin(object):
 
         try:
             instance = self.model()
-        except OperationalError as e:
+        except DatabaseError as e:
             errors.append(checks.Warning(
                 (
-                 "Encountered database operational error while attempting to create an instance of model '%s'. "
+                 "Encountered database error while attempting to create an instance of model '%s'. "
                  "This can occur for a number of reasons. One such reason is the model in question sets a default "
                  "value that queries the database and migrations have not yet been run for the model. If you "
                  "continue to see this warning, something is wrong. Otherwise it can be ignored. "
                  "The actual error is as follows:\n\n\t%s\n"
                 ) % (self.model, e),
                 obj=self,
-                id='%s.RandomFieldMixin.InstanceDatabaseOperationalError' % __name__,
+                id='%s.RandomFieldMixin.InstanceDatabaseError' % __name__,
             ))
         else:
             if hasattr(instance, self.available_values_attname):
