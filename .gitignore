@@ -5,3 +5,7 @@ db.sqlite3
 *.egg-info
 .eggs
 .coverage
+/.project
+/.pydevproject
+/vagrant/.vagrant
+/.tox

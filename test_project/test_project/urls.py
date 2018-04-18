@@ -15,7 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from randomfields.checks import DJANGO_VERSION_LT_19
+
+def include_compat(included_urls):
+    if DJANGO_VERSION_LT_19:
+        included_urls = include(included_urls)
+    return included_urls
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include_compat(admin.site.urls)),
 ]
