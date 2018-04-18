@@ -84,11 +84,7 @@ class IdentifierAdminTests(TestCase):
         options = soup.find_all('option', value=value)
         self.assertTrue(options, "No options found with value '%s'.  All options: %s" % (value, soup.find_all('option')))
         for option in options:
-            try:
-                selected = option["selected"]
-            except KeyError:
-                selected = "Key error.  Option html: %s" % option
-            self.assertEqual(selected, "selected")
+            self.assertTrue(option.has_attr("selected"), "Key error.  Option not selected!  Option html: %s" % option)
     
     def test_identifier_o2o_html(self):
         obj = TestIdentifierValue.objects.create()
