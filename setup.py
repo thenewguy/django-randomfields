@@ -40,7 +40,7 @@ class RunTestsCommand(SetuptoolsTestCommand):
         if not tests:
             tests.extend([nwd, os.path.abspath('test_project')])
         errno = coverage.cmdline.main(['run', os.path.abspath('test_project/manage.py'), 'test', '--verbosity=%d' % self.level] + tests)
-        
+
         if not self.suppress_coverage_report:
             coverage.cmdline.main(['report', '-m'])
 
@@ -68,7 +68,7 @@ if version_info < (3, 3):
 
 setup(
     name = "django-randomfields",
-    version = "0.1.8",
+    version = "0.1.9",
     description = "Random fields for django models",
     url = "https://github.com/thenewguy/django-randomfields",
     cmdclass={'test': RunTestsCommand},
