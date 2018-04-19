@@ -2,7 +2,12 @@ from bs4 import BeautifulSoup
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    # backwards compatibility Django < 2.0
+    # https://docs.djangoproject.com/en/2.0/releases/2.0/#features-removed-in-2-0
+    from django.core.urlresolvers import reverse
 from django.test import TestCase
 from randomfields.checks import DJANGO_VERSION_17
 from randomfields.models.fields import RandomCharField, RandomBigIntegerField
@@ -79,11 +84,7 @@ class IdentifierAdminTests(TestCase):
         options = soup.find_all('option', value=value)
         self.assertTrue(options, "No options found with value '%s'.  All options: %s" % (value, soup.find_all('option')))
         for option in options:
-            try:
-                selected = option["selected"]
-            except KeyError:
-                selected = "Key error.  Option html: %s" % option
-            self.assertEqual(selected, "selected")
+            self.assertTrue(option.has_attr("selected"), "Key error.  Option not selected!  Option html: %s" % option)
     
     def test_identifier_o2o_html(self):
         obj = TestIdentifierValue.objects.create()

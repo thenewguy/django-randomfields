@@ -58,6 +58,14 @@ class IntegerIdentifier(text_type):
         
         return self
     
+    def __getnewargs__(self):
+        return (
+            self.db_value,
+            self.possibilities,
+            self.lower_bound,
+            self.upper_bound,
+        )
+    
     def __int__(self):
         return self.db_value
 

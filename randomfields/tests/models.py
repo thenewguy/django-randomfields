@@ -33,29 +33,29 @@ class TestIdentifierData(models.Model):
     data = RandomIntegerIdentifierField()
 
 class TestIdentifierO2OValue(models.Model):
-    id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=True)
+    id = models.OneToOneField(TestIdentifierValue, on_delete=models.CASCADE, primary_key=True, editable=True)
 
 class TestIdentifierFKValue(models.Model):
-    data = models.ForeignKey(TestIdentifierValue)
+    data = models.ForeignKey(TestIdentifierValue, on_delete=models.CASCADE)
 
 class TestIdentifierM2MValue(models.Model):
     data = models.ManyToManyField(TestIdentifierValue, blank=True)
 
 class TestIdentifierAllValue(models.Model):
-    o2o = models.OneToOneField(TestIdentifierValue, related_name='+')
-    fk = models.ForeignKey(TestIdentifierValue, related_name='+')
+    o2o = models.OneToOneField(TestIdentifierValue, on_delete=models.CASCADE, related_name='+')
+    fk = models.ForeignKey(TestIdentifierValue, on_delete=models.CASCADE, related_name='+')
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=unique_related_name())
 
 class TestIdentifierM2MO2OPKValue(models.Model):
-    id = models.OneToOneField(TestIdentifierValue, primary_key=True, editable=True, related_name=unique_related_name())
+    id = models.OneToOneField(TestIdentifierValue, on_delete=models.CASCADE, primary_key=True, editable=True, related_name=unique_related_name())
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=unique_related_name())
 
 class TestIdentifierM2MO2OValue(models.Model):
-    o2o = models.OneToOneField(TestIdentifierValue, related_name='+')
+    o2o = models.OneToOneField(TestIdentifierValue, on_delete=models.CASCADE, related_name='+')
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name=unique_related_name())
 
 class TestIdentifierM2MFKValue(models.Model):
-    fk = models.ForeignKey(TestIdentifierValue, related_name='+')
+    fk = models.ForeignKey(TestIdentifierValue, on_delete=models.CASCADE, related_name='+')
     m2m = models.ManyToManyField(TestIdentifierValue, blank=True, related_name='+')
 
 class TestMaskedAttrDetection(models.Model):
