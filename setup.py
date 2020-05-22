@@ -73,7 +73,7 @@ setup(
     url = "https://github.com/thenewguy/django-randomfields",
     cmdclass={'test': RunTestsCommand},
     packages=find_packages(),
-    install_requires=['django'],
+    install_requires=['django', 'six'],
     tests_require=tests_require,
     classifiers = [
         'Programming Language :: Python',

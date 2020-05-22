@@ -1,7 +1,7 @@
 from django.core import checks, validators
 from django.db import models
-from django.utils.six import text_type, string_types
-from django.utils.six.moves import range
+from six import text_type, string_types
+from six.moves import range
 from ... import random
 from ...forms import RandomStringField as RandomStringFormField
 from .base import RandomFieldMixin

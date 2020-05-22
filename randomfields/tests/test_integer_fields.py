@@ -2,8 +2,8 @@ import json
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.test import SimpleTestCase
-from django.utils.six import integer_types, string_types
-from django.utils.six.moves import range
+from six import integer_types, string_types
+from six.moves import range
 from randomfields.models.fields import RandomFieldMixin
 from randomfields.models.fields.integer import RandomIntegerFieldMixin, RandomBigIntegerField, RandomIntegerField, RandomSmallIntegerField, \
                                         RandomBigIntegerIdentifierField, RandomIntegerIdentifierField, RandomSmallIntegerIdentifierField, \

@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.forms.models import model_to_dict
 from django.test import TestCase, SimpleTestCase
-from django.utils.six import text_type
+from six import text_type
 from randomfields.models.fields.integer import IntegerIdentifier
 from randomfields.models.fields import RandomCharField, RandomTextField
 from unittest import skipIf

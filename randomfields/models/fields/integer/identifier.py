@@ -1,6 +1,6 @@
 from django.core import checks
 from django.utils.encoding import force_text
-from django.utils.six import text_type, integer_types, string_types
+from six import text_type, integer_types, string_types
 from itertools import chain
 from functools import total_ordering
 from ....checks import DJANGO_VERSION_LT_18
