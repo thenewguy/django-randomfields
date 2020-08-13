@@ -40,9 +40,11 @@ env:
   - TOXENV=py37-django-22
   - TOXENV=py37-django-30
   - TOXENV=py37-django-31
+  - TOXENV=py37-django-master
   - TOXENV=py38-django-22
   - TOXENV=py38-django-30
   - TOXENV=py38-django-31
+  - TOXENV=py38-django-master
 matrix:
   fast_finish: true
   allow_failures:
