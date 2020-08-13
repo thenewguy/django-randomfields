@@ -29,9 +29,8 @@ matrix:
     - TOXENV: py37-django-master
 
 install:
+  - ver
   - pip install tox
 
 test_script:
-  - ver
   - tox
-
