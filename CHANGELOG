@@ -1,0 +1,2 @@
+VERSION 0.2.0:
+    - stopped testing on python < 3.5
