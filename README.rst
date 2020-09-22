@@ -29,3 +29,8 @@ TOX_WORK_DIR=/tmp tox -vv
 -- or test one environment and skip the coverage report --
 
 SUPPRESS_COVERAGE_REPORT="--suppress-coverage-report" TOX_WORK_DIR="/tmp" tox -vv -e py36-django-20 
+
+-- an example to run a specific test --
+
+tox -e py36 -- -o randomfields.tests.test_string_fields.SaveTests.test_identifier_expected_val
+ues_primary_key_by_fieldname
