@@ -17,6 +17,9 @@ apt-get update
 apt-get install -y git python3.5 python3.6 python3.7
 
 curl -O https://bootstrap.pypa.io/get-pip.py
-python3.6 get-pip.py
+python get-pip.py
 
 pip install tox
+
+# ensure tox is available
+tox --version
