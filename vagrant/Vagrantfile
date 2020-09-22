@@ -17,7 +17,6 @@ end
 Vagrant.configure("2") do |config|
     config.vm.boot_timeout = 600
     config.vm.box = "bento/ubuntu-14.04"
-    config.vm.box_url = "https://vagrantcloud.com/bento/boxes/ubuntu-14.04/versions/201802.02.0/providers/virtualbox.box"
 
     cpus = HOST_CPUS
     if 7000 < HOST_MEM
