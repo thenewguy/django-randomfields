@@ -37,8 +37,13 @@ Vagrant.configure("2") do |config|
 
 
     config.vm.provision :shell, path: "provision.sh"
+    
     config.vm.synced_folder ".", "/vagrant", disabled: true
-    config.vm.synced_folder "../", "/vagrant"
+    if Vagrant::Util::Platform.windows? then
+        config.vm.synced_folder "../", "/vagrant", type: 'smb', mount_options: ["mfsymlinks"]
+    else
+        config.vm.synced_folder "../", "/vagrant"
+    end
     
     
     # forward ports as listed in vagrant/vagrant/rebuild.sh
