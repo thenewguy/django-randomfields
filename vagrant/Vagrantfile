@@ -15,8 +15,7 @@ elsif HOST_IS_WINDOWS
 end
 
 Vagrant.configure("2") do |config|
-    config.vm.boot_timeout = 600
-    config.vm.box = "bento/ubuntu-14.04"
+    config.vm.box = "hashicorp/bionic64"
 
     cpus = HOST_CPUS
     if 7000 < HOST_MEM
