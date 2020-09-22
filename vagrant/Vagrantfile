@@ -43,23 +43,5 @@ Vagrant.configure("2") do |config|
     else
         config.vm.synced_folder "../", "/vagrant"
     end
-    
-    
-    # forward ports as listed in vagrant/vagrant/rebuild.sh
-    #
-    ##
-    ##
-    ##  THIS ALLOWS THE WEB BROWSER ON THE HOST MACHINE
-    ##  TO COMMUNICATE VIA '127.0.0.1' or 'localhost'
-    ##  i.e. `curl -i http://127.0.0.1:8080/`
-    ##
-    ##  THIS ALSO ALLOWS NETWORKED MACHINES TO ACCESS FORWARDED
-    ##  PORTS VIA THE HOST
-    ##  i.e. `curl -i http://host-ip-or-fqdn:8080/
-    ##
-    ##
-    
-    # responder http (use 8080 to avoid sudo requirement)
-    config.vm.network "forwarded_port", guest: 80, host: 8080
 
 end
