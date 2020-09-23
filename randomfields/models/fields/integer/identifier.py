@@ -1,5 +1,7 @@
 from django.core import checks
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.encoding import force_text
+from django.utils.functional import cached_property
 from six import text_type, integer_types, string_types
 from itertools import chain
 from functools import total_ordering
@@ -105,6 +107,20 @@ class IntegerIdentifier(text_type):
         return hash(text_type("{};{}").format(int(self), self))
 
 class RandomIntegerIdentifierFieldMixin(object):
+    @cached_property
+    def validators(self):
+        '''
+            adapted from https://github.com/django/django/blob/e387f191f76777015b6ea687ce83cdb05ee47cee/django/db/models/fields/__init__.py#L1796
+            
+            These validators can't be added at field initialization time since
+            they're based on values retrieved from `connection`.
+        '''
+        validators_ = super().validators
+        for v in validators_:
+            if isinstance(v, (MaxValueValidator, MinValueValidator)) and not isinstance(v.limit_value, IntegerIdentifier):
+                v.limit_value = IntegerIdentifier(v.limit_value, self.possibilities, self.lower_bound, self.upper_bound)
+        return validators_
+    
     def to_python(self, value):
         if value is not None and not isinstance(value, IntegerIdentifier):
             value = IntegerIdentifier(value, self.possibilities, self.lower_bound, self.upper_bound)

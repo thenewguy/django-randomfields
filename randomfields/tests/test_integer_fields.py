@@ -1,5 +1,9 @@
 import json
+from unittest import skipIf
+
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.test import SimpleTestCase
 from six import integer_types, string_types
@@ -10,6 +14,8 @@ from randomfields.models.fields.integer import RandomIntegerFieldMixin, RandomBi
                                         NarrowPositiveIntegerField, IntegerIdentifier
 from .. import random
 from . import mock
+from .models import TestIdentifierValue
+
 
 def raise_not_implemented(*args, **kwargs):
     raise NotImplementedError()
@@ -301,3 +307,37 @@ class FieldTests(SimpleTestCase):
         
         # test invalid possibilities
         self._test_integer_identifier_value_inputs(ValueError, value, 0, lower_bound, upper_bound)
+
+
+class IntegerIdentifierFieldTests(SimpleTestCase):
+    MISSING_VALIDATOR_RESTRICTIONS = not TestIdentifierValue._meta.get_field('id').validators
+    SHOULD_HAVE_VALIDATOR_RESTRICTIONS = settings.DATABASES['default']['ENGINE'] != 'django.db.backends.sqlite3'
+    
+    def test_if_restrictions_expected(self):
+        method = self.assertFalse if self.SHOULD_HAVE_VALIDATOR_RESTRICTIONS else self.assertTrue
+        method(self.MISSING_VALIDATOR_RESTRICTIONS)
+    
+    @skipIf(MISSING_VALIDATOR_RESTRICTIONS, "Database backend does not impose validator restrictions")
+    def test_expected_validators(self):
+        field = TestIdentifierValue._meta.get_field('id')
+        validators = TestIdentifierValue._meta.get_field('id').validators
+        self.assertEqual(len(validators), 2)
+        self.assertTrue(any([isinstance(v, MaxValueValidator) for v in validators]))
+        self.assertTrue(any([isinstance(v, MinValueValidator) for v in validators]))
+        
+        actual_max_limit = None
+        actual_min_limit = None
+        for v in validators:
+            if isinstance(v, MaxValueValidator):
+                actual_max_limit = v.limit_value
+            if isinstance(v, MinValueValidator):
+                actual_min_limit = v.limit_value
+        
+        self.assertIsInstance(actual_max_limit, IntegerIdentifier)
+        self.assertIsInstance(actual_min_limit, IntegerIdentifier)
+        
+        expected_max_limit = IntegerIdentifier(field.upper_bound, field.possibilities, field.lower_bound, field.upper_bound)
+        expected_min_limit = IntegerIdentifier(field.lower_bound, field.possibilities, field.lower_bound, field.upper_bound)
+        
+        self.assertEqual(actual_max_limit, expected_max_limit)
+        self.assertEqual(actual_min_limit, expected_min_limit)
