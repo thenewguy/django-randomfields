@@ -7,6 +7,8 @@ addons:
       - python3.5
       - python3.6
       - python3.7
+services:
+  - docker
 env:
   - TOXENV=py35-django-19
   - TOXENV=py35-django-110
@@ -26,6 +28,7 @@ env:
   - TOXENV=py37-django-30
   - TOXENV=py37-django-31
   - TOXENV=py37-django-master
+  - TOXENV=postgres
 matrix:
   fast_finish: true
   allow_failures:
@@ -33,6 +36,6 @@ matrix:
     - env: TOXENV=py37-django-master
     - env: TOXENV=py38-django-master
 install:
-    - pip install tox
+    - pip install tox tox-docker
 script:
   - tox

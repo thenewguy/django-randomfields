@@ -16,10 +16,13 @@ apt-get update
 
 apt-get install -y git python3.5 python3.6 python3.7
 
+curl -sSL https://get.docker.com/ | sh
+adduser vagrant docker
+
 curl -O https://bootstrap.pypa.io/get-pip.py
 python get-pip.py
 
-pip install tox
+pip install tox tox-docker
 
 # ensure tox is available
 tox --version
