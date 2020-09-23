@@ -10,31 +10,71 @@ addons:
 services:
   - docker
 env:
-  - TOXENV=py35-django-19
-  - TOXENV=py35-django-110
-  - TOXENV=py35-django-111
-  - TOXENV=py35-django-20
-  - TOXENV=py35-django-21
-  - TOXENV=py35-django-22
-  - TOXENV=py36-django-111
-  - TOXENV=py36-django-20
-  - TOXENV=py36-django-21
-  - TOXENV=py36-django-22
-  - TOXENV=py36-django-30
-  - TOXENV=py36-django-31
-  - TOXENV=py36-django-master
-  - TOXENV=py37-django-21
-  - TOXENV=py37-django-22
-  - TOXENV=py37-django-30
-  - TOXENV=py37-django-31
-  - TOXENV=py37-django-master
-  - TOXENV=postgres
+  - TOXENV=py35-django-19-sqlite
+  - TOXENV=py35-django-19-postgres
+  
+  - TOXENV=py35-django-110-sqlite
+  - TOXENV=py35-django-110-postgres
+  
+  - TOXENV=py35-django-111-sqlite
+  - TOXENV=py35-django-111-postgres
+  
+  - TOXENV=py35-django-20-sqlite
+  - TOXENV=py35-django-20-postgres
+  
+  - TOXENV=py35-django-21-sqlite
+  - TOXENV=py35-django-21-postgres
+  
+  - TOXENV=py35-django-22-sqlite
+  - TOXENV=py35-django-22-postgres
+  
+  - TOXENV=py36-django-111-sqlite
+  - TOXENV=py36-django-111-postgres
+  
+  - TOXENV=py36-django-20-sqlite
+  - TOXENV=py36-django-20-postgres
+  
+  - TOXENV=py36-django-21-sqlite
+  - TOXENV=py36-django-21-postgres
+  
+  - TOXENV=py36-django-22-sqlite
+  - TOXENV=py36-django-22-postgres
+  
+  - TOXENV=py36-django-30-sqlite
+  - TOXENV=py36-django-30-postgres
+  
+  - TOXENV=py36-django-31-sqlite
+  - TOXENV=py36-django-31-postgres
+  
+  - TOXENV=py36-django-master-sqlite
+  - TOXENV=py36-django-master-postgres
+  
+  - TOXENV=py37-django-21-sqlite
+  - TOXENV=py37-django-21-postgres
+  
+  - TOXENV=py37-django-22-sqlite
+  - TOXENV=py37-django-22-postgres
+  
+  - TOXENV=py37-django-30-sqlite
+  - TOXENV=py37-django-30-postgres
+  
+  - TOXENV=py37-django-31-sqlite
+  - TOXENV=py37-django-31-postgres
+  
+  - TOXENV=py37-django-master-sqlite
+  - TOXENV=py37-django-master-postgres
+  
 matrix:
   fast_finish: true
   allow_failures:
-    - env: TOXENV=py36-django-master
-    - env: TOXENV=py37-django-master
-    - env: TOXENV=py38-django-master
+    - env: TOXENV=py36-django-master-sqlite
+    - env: TOXENV=py36-django-master-postgres
+    
+    - env: TOXENV=py37-django-master-sqlite
+    - env: TOXENV=py37-django-master-postgres
+    
+    - env: TOXENV=py38-django-master-sqlite
+    - env: TOXENV=py38-django-master-postgres
 install:
     - pip install tox tox-docker
 script:
