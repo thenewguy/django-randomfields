@@ -1,6 +1,7 @@
 import json
 from unittest import skipIf
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -310,6 +311,11 @@ class FieldTests(SimpleTestCase):
 
 class IntegerIdentifierFieldTests(SimpleTestCase):
     MISSING_VALIDATOR_RESTRICTIONS = not TestIdentifierValue._meta.get_field('id').validators
+    SHOULD_HAVE_VALIDATOR_RESTRICTIONS = settings.DATABASES['default']['ENGINE'] != 'django.db.backends.sqlite3'
+    
+    def test_if_restrictions_expected(self):
+        method = self.assertFalse if self.SHOULD_HAVE_VALIDATOR_RESTRICTIONS else self.assertTrue
+        method(self.MISSING_VALIDATOR_RESTRICTIONS)
     
     @skipIf(MISSING_VALIDATOR_RESTRICTIONS, "Database backend does not impose validator restrictions")
     def test_expected_validators(self):
