@@ -105,6 +105,12 @@ class IntegerIdentifier(text_type):
     
     def __hash__(self):
         return hash(text_type("{};{}").format(int(self), self))
+    
+    def __format__(self, format_spec):
+        try:
+            return format(self.display_value, format_spec)
+        except ValueError:
+            return format(self.display_str, format_spec)
 
 class RandomIntegerIdentifierFieldMixin(object):
     @cached_property

@@ -341,3 +341,14 @@ class IntegerIdentifierFieldTests(SimpleTestCase):
         
         self.assertEqual(actual_max_limit, expected_max_limit)
         self.assertEqual(actual_min_limit, expected_min_limit)
+    
+    def test_integer_identifier_string_formatting(self):
+        value = IntegerIdentifier(1, 3, -1, 1)
+        self.assertEqual(value.display_value, 4)
+        self.assertEqual(value.db_value, 1)
+        self.assertEqual('{}'.format(value), '4')
+        self.assertEqual('{:s}'.format(value), '4')
+        self.assertEqual('{:d}'.format(value), '4')
+        self.assertEqual('{!s}'.format(value), '4')
+        self.assertEqual('%s' % value, '4')
+        self.assertEqual('%d' % value, '1')
